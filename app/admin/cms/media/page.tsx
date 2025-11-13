@@ -55,9 +55,24 @@ export default function MediaManagerPage() {
 
     setUploading(true);
     const uploadedFiles: MediaItem[] = [];
+    const errors: string[] = [];
 
-    for (const file of Array.from(files)) {
+    // Upload files sequentially for better progress tracking
+    for (let i = 0; i < files.length; i++) {
+      const file = files[i];
       try {
+        // Validate file type
+        if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+          errors.push(`${file.name}: Invalid file type. Only images and videos are allowed.`);
+          continue;
+        }
+
+        // Validate file size (max 10MB)
+        if (file.size > 10 * 1024 * 1024) {
+          errors.push(`${file.name}: File too large (max 10MB)`);
+          continue;
+        }
+
         const formData = new FormData();
         formData.append('file', file);
         if (selectedFolder) {
@@ -72,9 +87,13 @@ export default function MediaManagerPage() {
         if (response.ok) {
           const mediaItem = await response.json();
           uploadedFiles.push(mediaItem);
+        } else {
+          const errorData = await response.json().catch(() => ({ error: 'Upload failed' }));
+          errors.push(`${file.name}: ${errorData.error || 'Upload failed'}`);
         }
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error uploading file:', error);
+        errors.push(`${file.name}: ${error?.message || 'Network error'}`);
       }
     }
 
@@ -82,11 +101,20 @@ export default function MediaManagerPage() {
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
+
+    // Show success/error messages
+    if (uploadedFiles.length > 0) {
+      alert(`Successfully uploaded ${uploadedFiles.length} file(s)!`);
+    }
+    if (errors.length > 0) {
+      alert(`Errors:\n${errors.join('\n')}`);
+    }
+
     fetchMedia();
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this media file?')) return;
+    if (!confirm('Are you sure you want to delete this media file? This action cannot be undone.')) return;
 
     try {
       const response = await fetch(`/api/cms/media/${id}`, {
@@ -95,15 +123,31 @@ export default function MediaManagerPage() {
 
       if (response.ok) {
         fetchMedia();
+        alert('Media file deleted successfully!');
+      } else {
+        const errorData = await response.json().catch(() => ({ error: 'Delete failed' }));
+        alert(`Failed to delete: ${errorData.error || 'Unknown error'}`);
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error deleting media:', error);
+      alert(`Error: ${error?.message || 'Failed to delete media file'}`);
     }
   };
 
-  const copyUrl = (url: string) => {
-    navigator.clipboard.writeText(url);
-    alert('URL copied to clipboard!');
+  const copyUrl = async (url: string) => {
+    try {
+      await navigator.clipboard.writeText(url);
+      alert('✓ URL copied to clipboard!');
+    } catch (error) {
+      // Fallback for older browsers
+      const textArea = document.createElement('textarea');
+      textArea.value = url;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      alert('✓ URL copied to clipboard!');
+    }
   };
 
   const formatFileSize = (bytes: number) => {
@@ -114,7 +158,8 @@ export default function MediaManagerPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-[400px]">
+      <div className="flex flex-col items-center justify-center min-h-[400px]">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mb-4"></div>
         <div className="text-gray-600 font-semibold">Loading media...</div>
       </div>
     );
@@ -157,7 +202,14 @@ export default function MediaManagerPage() {
             />
           </div>
         </div>
-        {uploading && <p className="text-sm text-blue-600 mt-2">Uploading...</p>}
+        {uploading && (
+          <div className="mt-2">
+            <p className="text-sm text-blue-600 font-medium">⏳ Uploading files... Please wait.</p>
+            <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
+              <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{ width: '60%' }}></div>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Folder Filter */}

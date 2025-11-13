@@ -46,7 +46,15 @@ export default function EditPagePage() {
         }
         setPage(data);
       } else if (response.status === 404) {
-        router.push('/admin/cms/pages');
+        console.error('Page not found:', id);
+        // Don't redirect immediately, show error message instead
+        setPage(null);
+        setLoading(false);
+        return;
+      } else {
+        console.error('Error fetching page:', response.status);
+        setLoading(false);
+        return;
       }
     } catch (error) {
       console.error('Error fetching page:', error);
