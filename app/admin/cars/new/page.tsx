@@ -245,7 +245,7 @@ export default function NewCarPage() {
         color: formData.color && formData.color.toString().trim() ? formData.color.toString().trim() : null,
         description: formData.description && formData.description.toString().trim() ? formData.description.toString().trim() : null,
         images: images,
-        featured: formData.featured === true || formData.featured === 'true',
+        featured: Boolean(formData.featured),
       };
 
       console.log('Submitting car data:', { ...carData, images: `${images.length} images` });

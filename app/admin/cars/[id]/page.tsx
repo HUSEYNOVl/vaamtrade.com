@@ -286,7 +286,7 @@ export default function EditCarPage() {
         color: formData.color || null,
         description: formData.description || null,
         images: images,
-        featured: formData.featured === true || formData.featured === 'true',
+        featured: Boolean(formData.featured),
       };
 
       console.log('Updating car data:', { ...carData, images: `${images.length} images` });
