@@ -1,0 +1,172 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Car {
+  id           String   @id @default(cuid())
+  make         String
+  model        String
+  year         Int
+  price        Float
+  currency     String   @default("USD")
+  mileage      Int?
+  condition    String   // "New" or "Used"
+  transmission String?  // "Automatic" or "Manual"
+  fuelType     String?  // "Petrol", "Diesel", "Electric", "Hybrid"
+  color        String?
+  description  String?
+  images       String   // JSON array stored as string
+  featured     Boolean  @default(false)
+  videoUrl     String?  // YouTube or uploaded video URL
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  @@index([make, model])
+  @@index([year])
+  @@index([price])
+  @@index([condition])
+  @@index([featured])
+}
+
+// Global Website Settings
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   // JSON string for complex values
+  type      String   @default("text") // 'text', 'color', 'image', 'number', 'boolean', 'json'
+  category  String   @default("general") // 'design', 'branding', 'contact', 'header', 'footer', 'seo'
+  locale    String?  // For multi-language settings
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([category])
+  @@index([key, locale])
+}
+
+// Dynamic Pages
+model Page {
+  id          String        @id @default(cuid())
+  slug        String        @unique
+  title       String
+  status      String        @default("draft") // 'draft', 'published'
+  seoTitle    String?
+  seoDesc     String?
+  seoKeywords String?
+  sections    String        // JSON array of section configurations
+  order       Int           @default(0)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  @@index([slug])
+  @@index([status])
+}
+
+// Media Manager
+model Media {
+  id          String   @id @default(cuid())
+  filename    String
+  originalName String
+  path        String
+  url         String
+  mimeType    String
+  size        Int      // Size in bytes
+  folder      String?  // For organization
+  alt         String?
+  caption     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([folder])
+  @@index([mimeType])
+}
+
+// Multi-language Translations
+model Translation {
+  id        String   @id @default(cuid())
+  key       String
+  locale    String
+  value     String   // Text content
+  namespace String?  @default("common") // 'common', 'home', 'about', 'contact', etc.
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([key, locale, namespace])
+  @@index([locale])
+  @@index([namespace])
+}
+
+// Certificates
+model Certificate {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  imageUrl    String
+  order       Int      @default(0)
+  visible     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([visible])
+  @@index([order])
+}
+
+// Videos
+model Video {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  thumbnailUrl String?
+  videoUrl    String   // YouTube URL or uploaded video path
+  type        String   @default("youtube") // 'youtube', 'uploaded', 'vimeo'
+  order       Int      @default(0)
+  visible     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([visible])
+  @@index([order])
+}
+
+// Testimonials
+model Testimonial {
+  id          String   @id @default(cuid())
+  name        String
+  role        String?
+  company     String?
+  content     String   // Testimonial text
+  imageUrl    String?
+  rating      Int?     // 1-5
+  visible     Boolean  @default(true)
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([visible])
+  @@index([order])
+}
+
+// FAQs
+model FAQ {
+  id          String   @id @default(cuid())
+  question    String
+  answer      String   // FAQ answer text
+  category    String?
+  order       Int      @default(0)
+  visible     Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("FAQ")
+  @@index([visible])
+  @@index([category])
+  @@index([order])
+}
+
