@@ -221,8 +221,10 @@ export default function NewCarPage() {
         return;
       }
 
-      // Ensure images is an array
-      const images = Array.isArray(formData.images) ? formData.images : [];
+      // Ensure images is an array and filter out empty values
+      const images = Array.isArray(formData.images) 
+        ? formData.images.filter((img) => img && typeof img === 'string' && img.trim().length > 0)
+        : [];
 
       const carData = {
         make: makeValue,
@@ -237,10 +239,10 @@ export default function NewCarPage() {
         color: formData.color || null,
         description: formData.description || null,
         images: images,
-        featured: formData.featured || false,
+        featured: formData.featured === true || formData.featured === 'true',
       };
 
-      console.log('Submitting car data:', { ...carData, images: images.length });
+      console.log('Submitting car data:', { ...carData, images: `${images.length} images` });
 
       const response = await fetch('/api/cars', {
         method: 'POST',
@@ -249,10 +251,22 @@ export default function NewCarPage() {
       });
 
       if (response.ok) {
-        router.push('/admin/cars');
+        const result = await response.json();
+        console.log('Car created successfully:', result.id);
+        // Redirect after a brief delay to ensure data is saved
+        setTimeout(() => {
+          router.push('/admin/cars');
+          router.refresh(); // Force refresh to show new car
+        }, 500);
       } else {
-        const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-        setSubmitError(errorData.error || 'Failed to create car. Please check all required fields.');
+        let errorMessage = 'Failed to create car. Please check all required fields.';
+        try {
+          const errorData = await response.json();
+          errorMessage = errorData.error || errorMessage;
+        } catch (e) {
+          errorMessage = `Server error (${response.status}). Please try again.`;
+        }
+        setSubmitError(errorMessage);
       }
     } catch (error: any) {
       console.error('Error creating car:', error);
