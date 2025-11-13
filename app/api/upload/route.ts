@@ -5,6 +5,21 @@ import { existsSync } from 'fs';
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if we're on Vercel (read-only filesystem)
+    const isVercel = process.env.VERCEL === '1';
+    
+    if (isVercel) {
+      // On Vercel, we need to use a different approach
+      // For now, return an error with instructions
+      return NextResponse.json(
+        { 
+          error: 'File uploads are not supported on Vercel. Please use a cloud storage service like Vercel Blob, AWS S3, or Cloudinary.',
+          details: 'Vercel has a read-only filesystem. You need to configure cloud storage for file uploads.',
+        },
+        { status: 501 }
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
 
@@ -38,9 +53,18 @@ export async function POST(request: NextRequest) {
 
     // Create uploads directory if it doesn't exist
     const uploadsDir = join(process.cwd(), 'public', 'uploads');
-    if (!existsSync(uploadsDir)) {
-      await mkdir(uploadsDir, { recursive: true });
-      console.log('Created uploads directory:', uploadsDir);
+    
+    try {
+      if (!existsSync(uploadsDir)) {
+        await mkdir(uploadsDir, { recursive: true });
+        console.log('Created uploads directory:', uploadsDir);
+      }
+    } catch (dirError: any) {
+      console.error('Error creating uploads directory:', dirError);
+      return NextResponse.json(
+        { error: 'Failed to create uploads directory', details: dirError?.message },
+        { status: 500 }
+      );
     }
 
     // Generate unique filename
@@ -50,8 +74,20 @@ export async function POST(request: NextRequest) {
     const filepath = join(uploadsDir, filename);
 
     // Write file
-    await writeFile(filepath, buffer);
-    console.log('File saved to:', filepath);
+    try {
+      await writeFile(filepath, buffer);
+      console.log('File saved to:', filepath);
+    } catch (writeError: any) {
+      console.error('Error writing file:', writeError);
+      return NextResponse.json(
+        { 
+          error: 'Failed to save file', 
+          details: writeError?.message,
+          code: writeError?.code,
+        },
+        { status: 500 }
+      );
+    }
 
     // Return the URL path
     const url = `/uploads/${filename}`;
