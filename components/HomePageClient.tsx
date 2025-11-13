@@ -43,7 +43,50 @@ export default function HomePageClient({ cars, car }: HomePageClientProps) {
 
   return (
     <>
-      <CarFilter cars={cars} onFilterChange={setFilteredCars} />
+      <CarFilter onFilterChange={(filters) => {
+        // Apply filters to cars
+        let filtered = [...cars];
+        
+        if (filters.search) {
+          const searchLower = filters.search.toLowerCase();
+          filtered = filtered.filter(
+            (car) =>
+              car.make.toLowerCase().includes(searchLower) ||
+              car.model.toLowerCase().includes(searchLower) ||
+              car.year.toString().includes(searchLower)
+          );
+        }
+        
+        if (filters.minPrice) {
+          filtered = filtered.filter((car) => car.price >= parseFloat(filters.minPrice));
+        }
+        
+        if (filters.maxPrice) {
+          filtered = filtered.filter((car) => car.price <= parseFloat(filters.maxPrice));
+        }
+        
+        if (filters.minYear) {
+          filtered = filtered.filter((car) => car.year >= parseInt(filters.minYear));
+        }
+        
+        if (filters.maxYear) {
+          filtered = filtered.filter((car) => car.year <= parseInt(filters.maxYear));
+        }
+        
+        if (filters.condition) {
+          filtered = filtered.filter((car) => car.condition === filters.condition);
+        }
+        
+        if (filters.transmission) {
+          filtered = filtered.filter((car) => car.transmission === filters.transmission);
+        }
+        
+        if (filters.fuelType) {
+          filtered = filtered.filter((car) => car.fuelType === filters.fuelType);
+        }
+        
+        setFilteredCars(filtered);
+      }} />
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {filteredCars.map((car) => (
           <CarCard key={car.id} car={car} />

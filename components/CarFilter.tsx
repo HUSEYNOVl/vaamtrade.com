@@ -1,71 +1,56 @@
 'use client';
 
 import { useState } from 'react';
-import { Car } from '@/types/car';
 
-interface CarFilterProps {
-  cars: Car[];
-  onFilterChange: (filteredCars: Car[]) => void;
+export interface FilterState {
+  search: string;
+  minPrice: string;
+  maxPrice: string;
+  minYear: string;
+  maxYear: string;
+  condition: string;
+  transmission: string;
+  fuelType: string;
 }
 
-export default function CarFilter({ cars, onFilterChange }: CarFilterProps) {
-  const [filters, setFilters] = useState({
-    brand: '',
-    minYear: '',
-    maxYear: '',
+interface CarFilterProps {
+  onFilterChange: (filters: FilterState) => void;
+}
+
+export default function CarFilter({ onFilterChange }: CarFilterProps) {
+  const [filters, setFilters] = useState<FilterState>({
+    search: '',
     minPrice: '',
     maxPrice: '',
+    minYear: '',
+    maxYear: '',
     condition: '',
+    transmission: '',
+    fuelType: '',
   });
 
-  const brands = Array.from(new Set(cars.map(car => car.make))).sort();
   const currentYear = new Date().getFullYear();
   const years = Array.from({ length: 30 }, (_, i) => currentYear - i);
 
-  const handleFilterChange = (key: string, value: string) => {
+  const handleFilterChange = (key: keyof FilterState, value: string) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
-
-    // Apply filters
-    let filtered = [...cars];
-
-    if (newFilters.brand) {
-      filtered = filtered.filter(car => car.make.toLowerCase().includes(newFilters.brand.toLowerCase()));
-    }
-
-    if (newFilters.minYear) {
-      filtered = filtered.filter(car => car.year >= parseInt(newFilters.minYear));
-    }
-
-    if (newFilters.maxYear) {
-      filtered = filtered.filter(car => car.year <= parseInt(newFilters.maxYear));
-    }
-
-    if (newFilters.minPrice) {
-      filtered = filtered.filter(car => car.price >= parseFloat(newFilters.minPrice));
-    }
-
-    if (newFilters.maxPrice) {
-      filtered = filtered.filter(car => car.price <= parseFloat(newFilters.maxPrice));
-    }
-
-    if (newFilters.condition) {
-      filtered = filtered.filter(car => car.condition === newFilters.condition);
-    }
-
-    onFilterChange(filtered);
+    onFilterChange(newFilters);
   };
 
   const clearFilters = () => {
-    setFilters({
-      brand: '',
-      minYear: '',
-      maxYear: '',
+    const emptyFilters: FilterState = {
+      search: '',
       minPrice: '',
       maxPrice: '',
+      minYear: '',
+      maxYear: '',
       condition: '',
-    });
-    onFilterChange(cars);
+      transmission: '',
+      fuelType: '',
+    };
+    setFilters(emptyFilters);
+    onFilterChange(emptyFilters);
   };
 
   return (
@@ -79,19 +64,16 @@ export default function CarFilter({ cars, onFilterChange }: CarFilterProps) {
           Clear Filters
         </button>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <div>
-          <label className="block text-sm font-semibold mb-2 text-gray-700">Brand</label>
-          <select
-            value={filters.brand}
-            onChange={(e) => handleFilterChange('brand', e.target.value)}
+          <label className="block text-sm font-semibold mb-2 text-gray-700">Search</label>
+          <input
+            type="text"
+            value={filters.search}
+            onChange={(e) => handleFilterChange('search', e.target.value)}
+            placeholder="Make, model, year..."
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-gray-900"
-          >
-            <option value="">All Brands</option>
-            {brands.map(brand => (
-              <option key={brand} value={brand}>{brand}</option>
-            ))}
-          </select>
+          />
         </div>
 
         <div>
@@ -154,6 +136,34 @@ export default function CarFilter({ cars, onFilterChange }: CarFilterProps) {
             <option value="">All</option>
             <option value="New">New</option>
             <option value="Used">Used</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold mb-2 text-gray-700">Transmission</label>
+          <select
+            value={filters.transmission}
+            onChange={(e) => handleFilterChange('transmission', e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-gray-900"
+          >
+            <option value="">All</option>
+            <option value="Automatic">Automatic</option>
+            <option value="Manual">Manual</option>
+          </select>
+        </div>
+
+        <div>
+          <label className="block text-sm font-semibold mb-2 text-gray-700">Fuel Type</label>
+          <select
+            value={filters.fuelType}
+            onChange={(e) => handleFilterChange('fuelType', e.target.value)}
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 text-gray-900"
+          >
+            <option value="">All</option>
+            <option value="Petrol">Petrol</option>
+            <option value="Diesel">Diesel</option>
+            <option value="Electric">Electric</option>
+            <option value="Hybrid">Hybrid</option>
           </select>
         </div>
       </div>
