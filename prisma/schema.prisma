@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -22,8 +22,8 @@ model Car {
   transmission String?  // "Automatic" or "Manual"
   fuelType     String?  // "Petrol", "Diesel", "Electric", "Hybrid"
   color        String?
-  description  String?  @db.Text
-  images       String   @db.Text // JSON array stored as string
+  description  String?
+  images       String   // JSON array stored as string
   featured     Boolean  @default(false)
   videoUrl     String?  // YouTube or uploaded video URL
   createdAt    DateTime @default(now())
@@ -40,7 +40,7 @@ model Car {
 model Setting {
   id        String   @id @default(cuid())
   key       String   @unique
-  value     String   @db.Text // JSON string for complex values
+  value     String   // JSON string for complex values
   type      String   @default("text") // 'text', 'color', 'image', 'number', 'boolean', 'json'
   category  String   @default("general") // 'design', 'branding', 'contact', 'header', 'footer', 'seo'
   locale    String?  // For multi-language settings
@@ -60,7 +60,7 @@ model Page {
   seoTitle    String?
   seoDesc     String?
   seoKeywords String?
-  sections    String        @db.Text // JSON array of section configurations
+  sections    String        // JSON array of section configurations
   order       Int           @default(0)
   createdAt   DateTime      @default(now())
   updatedAt   DateTime      @updatedAt
@@ -93,7 +93,7 @@ model Translation {
   id        String   @id @default(cuid())
   key       String
   locale    String
-  value     String   @db.Text // Text content
+  value     String   // Text content
   namespace String?  @default("common") // 'common', 'home', 'about', 'contact', etc.
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -141,7 +141,7 @@ model Testimonial {
   name        String
   role        String?
   company     String?
-  content     String   @db.Text // Testimonial text
+  content     String   // Testimonial text
   imageUrl    String?
   rating      Int?     // 1-5
   visible     Boolean  @default(true)
@@ -157,7 +157,7 @@ model Testimonial {
 model FAQ {
   id          String   @id @default(cuid())
   question    String
-  answer      String   @db.Text // FAQ answer text
+  answer      String   // FAQ answer text
   category    String?
   order       Int      @default(0)
   visible     Boolean  @default(true)

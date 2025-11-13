@@ -65,13 +65,24 @@ export default function CertificatesSection({ certificates = [] }: CertificatesS
                 className="bg-white rounded-xl p-6 shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer border border-gray-100 hover:border-red-200 group"
               >
                 <div className="relative h-48 w-full bg-gray-100 rounded-lg mb-4 overflow-hidden">
-                  <Image
-                    src={cert.imageUrl}
-                    alt={cert.title}
-                    fill
-                    className="object-cover group-hover:scale-105 transition-transform duration-300"
-                    unoptimized
-                  />
+                  {cert.imageUrl && cert.imageUrl !== '/images/placeholder-cert.jpg' ? (
+                    <Image
+                      src={cert.imageUrl}
+                      alt={cert.title}
+                      fill
+                      className="object-cover group-hover:scale-105 transition-transform duration-300"
+                      unoptimized
+                    />
+                  ) : (
+                    <div className="w-full h-full bg-gradient-to-br from-gray-200 to-gray-300 flex items-center justify-center">
+                      <div className="text-center">
+                        <svg className="w-12 h-12 text-gray-500 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <p className="text-gray-600 text-xs">Certificate</p>
+                      </div>
+                    </div>
+                  )}
                   <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-10 transition-opacity flex items-center justify-center">
                     <svg className="w-12 h-12 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v6m3-3H7" />
@@ -100,13 +111,24 @@ export default function CertificatesSection({ certificates = [] }: CertificatesS
               ×
             </button>
             <div className="relative h-96 w-full bg-gray-100 rounded-lg mb-4">
-              <Image
-                src={selectedCert.imageUrl}
-                alt={selectedCert.title}
-                fill
-                className="object-contain"
-                unoptimized
-              />
+              {selectedCert.imageUrl && selectedCert.imageUrl !== '/images/placeholder-cert.jpg' ? (
+                <Image
+                  src={selectedCert.imageUrl}
+                  alt={selectedCert.title}
+                  fill
+                  className="object-contain"
+                  unoptimized
+                />
+              ) : (
+                <div className="w-full h-full flex items-center justify-center">
+                  <div className="text-center">
+                    <svg className="w-24 h-24 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    </svg>
+                    <p className="text-gray-500">Certificate Image</p>
+                  </div>
+                </div>
+              )}
             </div>
             <h3 className="text-2xl font-bold text-gray-900 mb-2">{selectedCert.title}</h3>
             <p className="text-gray-600">{selectedCert.description}</p>

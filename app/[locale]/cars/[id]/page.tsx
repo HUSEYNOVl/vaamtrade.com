@@ -15,7 +15,7 @@ export default async function CarDetailPage({
   const t = await getTranslations({ locale, namespace: 'CarDetail' });
 
   const car = await prisma.car.findUnique({
-    where: { id },
+    where: { id: id },
   });
 
   if (!car) {
