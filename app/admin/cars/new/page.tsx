@@ -336,7 +336,18 @@ export default function NewCarPage() {
 
       {submitError && (
         <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg">
-          <p className="text-red-800 font-semibold">✗ {submitError}</p>
+          <p className="text-red-800 font-semibold mb-2">✗ Error: {submitError.split('\n\n')[0]}</p>
+          {submitError.includes('\n\nDetails:') && (
+            <details className="mt-2">
+              <summary className="text-red-700 text-sm cursor-pointer hover:text-red-900">Show technical details</summary>
+              <pre className="mt-2 text-xs text-red-600 bg-red-100 p-2 rounded overflow-auto">
+                {submitError.split('\n\nDetails:')[1]}
+              </pre>
+            </details>
+          )}
+          <p className="text-sm text-red-600 mt-2">
+            💡 Tip: Open browser console (F12) to see detailed error logs
+          </p>
         </div>
       )}
 
@@ -550,7 +561,17 @@ export default function NewCarPage() {
                 <p className="text-sm text-green-600 mt-2 font-medium">✓ Image uploaded successfully!</p>
               )}
               {uploadError && (
-                <p className="text-sm text-red-600 mt-2 font-medium">✗ {uploadError}</p>
+                <div className="mt-2">
+                  <p className="text-sm text-red-600 font-medium">✗ {uploadError.split('\n\n')[0]}</p>
+                  {uploadError.includes('\n\nDetails:') && (
+                    <details className="mt-1">
+                      <summary className="text-red-500 text-xs cursor-pointer hover:text-red-700">Show details</summary>
+                      <pre className="mt-1 text-xs text-red-500 bg-red-50 p-2 rounded overflow-auto">
+                        {uploadError.split('\n\nDetails:')[1]}
+                      </pre>
+                    </details>
+                  )}
+                </div>
               )}
             </div>
 
