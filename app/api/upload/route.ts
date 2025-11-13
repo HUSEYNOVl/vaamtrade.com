@@ -2,24 +2,63 @@ import { NextRequest, NextResponse } from 'next/server';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
+import { put } from '@vercel/blob';
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if we're on Vercel (read-only filesystem)
+    // Check if we're on Vercel or have Blob token configured
     const isVercel = process.env.VERCEL === '1';
+    const hasBlobToken = !!process.env.BLOB_READ_WRITE_TOKEN;
     
-    if (isVercel) {
-      // On Vercel, we need to use a different approach
-      // For now, return an error with instructions
-      return NextResponse.json(
-        { 
-          error: 'File uploads are not supported on Vercel. Please use a cloud storage service like Vercel Blob, AWS S3, or Cloudinary.',
-          details: 'Vercel has a read-only filesystem. You need to configure cloud storage for file uploads.',
-        },
-        { status: 501 }
-      );
-    }
+    // Use Vercel Blob if on Vercel or if token is configured
+    if (isVercel || hasBlobToken) {
+      if (!hasBlobToken) {
+        return NextResponse.json(
+          { 
+            error: 'BLOB_READ_WRITE_TOKEN is not configured. Please add it to your environment variables.',
+            details: 'Go to Vercel Dashboard → Settings → Environment Variables → Add BLOB_READ_WRITE_TOKEN',
+          },
+          { status: 500 }
+        );
+      }
 
+      const formData = await request.formData();
+      const file = formData.get('file') as File;
+
+      if (!file) {
+        console.error('No file in form data');
+        return NextResponse.json({ error: 'No file uploaded' }, { status: 400 });
+      }
+
+      console.log('Uploading to Vercel Blob:', file.name, file.type, file.size, 'bytes');
+
+      // Validate file type
+      if (!file.type.startsWith('image/')) {
+        return NextResponse.json({ error: 'File must be an image' }, { status: 400 });
+      }
+
+      // Validate file size (max 10MB)
+      const maxSize = 10 * 1024 * 1024; // 10MB
+      if (file.size > maxSize) {
+        return NextResponse.json({ error: 'File size must be less than 10MB' }, { status: 400 });
+      }
+
+      // Generate unique filename
+      const timestamp = Date.now();
+      const sanitizedName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const filename = `uploads/${timestamp}-${sanitizedName}`;
+
+      // Upload to Vercel Blob
+      const blob = await put(filename, file, {
+        access: 'public',
+        contentType: file.type,
+      });
+
+      console.log('File uploaded to Vercel Blob:', blob.url);
+      return NextResponse.json({ url: blob.url }, { status: 200 });
+    }
+    
+    // Local development: use file system
     const formData = await request.formData();
     const file = formData.get('file') as File;
 
