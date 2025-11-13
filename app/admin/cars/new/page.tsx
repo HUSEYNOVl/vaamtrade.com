@@ -10,9 +10,9 @@ export default function NewCarPage() {
     make: '',
     model: '',
     year: new Date().getFullYear(),
-    price: '',
+    price: '' as string | number,
     currency: 'USD',
-    mileage: '',
+    mileage: '' as string | number,
     condition: 'Used',
     transmission: '',
     fuelType: '',
@@ -55,6 +55,8 @@ export default function NewCarPage() {
         body: uploadFormData,
       });
 
+      console.log('Upload response status:', response.status);
+
       if (response.ok) {
         let data;
         try {
@@ -85,14 +87,18 @@ export default function NewCarPage() {
         setTimeout(() => setUploadSuccess(false), 3000);
       } else {
         let errorMessage = 'Failed to upload image. Please try again.';
+        let errorDetails = '';
         try {
           const text = await response.text();
+          console.error('Upload error response:', text);
           const errorData = JSON.parse(text);
           errorMessage = errorData.error || errorMessage;
+          errorDetails = errorData.details || '';
         } catch (e) {
+          console.error('Failed to parse upload error:', e);
           errorMessage = `Server error (${response.status}). Please try again.`;
         }
-        setUploadError(errorMessage);
+        setUploadError(errorDetails ? `${errorMessage}\n\nDetails: ${errorDetails}` : errorMessage);
       }
     } catch (error: any) {
       console.error('Error uploading file:', error);
@@ -194,29 +200,29 @@ export default function NewCarPage() {
 
     try {
       // Get current form values
-      const makeValue = formData.make?.trim() || '';
-      const modelValue = formData.model?.trim() || '';
-      const yearValue = formData.year;
-      const priceValue = formData.price;
+      const makeValue = (formData.make || '').toString().trim();
+      const modelValue = (formData.model || '').toString().trim();
+      const yearValue = formData.year ? parseInt(formData.year.toString()) : null;
+      const priceValue = formData.price ? parseFloat(formData.price.toString()) : null;
 
       // Validate required fields with better error messages
-      if (!makeValue) {
+      if (!makeValue || makeValue.length === 0) {
         setSubmitError('Make is required');
         setIsSubmitting(false);
         return;
       }
-      if (!modelValue) {
+      if (!modelValue || modelValue.length === 0) {
         setSubmitError('Model is required');
         setIsSubmitting(false);
         return;
       }
-      if (!yearValue || yearValue < 1900 || yearValue > new Date().getFullYear() + 1) {
-        setSubmitError('Please enter a valid year');
+      if (!yearValue || isNaN(yearValue) || yearValue < 1900 || yearValue > new Date().getFullYear() + 1) {
+        setSubmitError('Please enter a valid year (1900 to ' + (new Date().getFullYear() + 1) + ')');
         setIsSubmitting(false);
         return;
       }
-      if (!priceValue || parseFloat(priceValue.toString()) <= 0) {
-        setSubmitError('Price must be greater than 0');
+      if (!priceValue || isNaN(priceValue) || priceValue <= 0) {
+        setSubmitError('Price must be a number greater than 0');
         setIsSubmitting(false);
         return;
       }
@@ -229,20 +235,27 @@ export default function NewCarPage() {
       const carData = {
         make: makeValue,
         model: modelValue,
-        year: parseInt(yearValue.toString()),
-        price: parseFloat(priceValue.toString()),
+        year: yearValue,
+        price: priceValue,
         currency: formData.currency || 'USD',
-        mileage: formData.mileage ? parseInt(formData.mileage.toString()) : null,
+        mileage: formData.mileage && formData.mileage.toString().trim() ? parseInt(formData.mileage.toString()) : null,
         condition: formData.condition || 'Used',
-        transmission: formData.transmission || null,
-        fuelType: formData.fuelType || null,
-        color: formData.color || null,
-        description: formData.description || null,
+        transmission: formData.transmission && formData.transmission.toString().trim() ? formData.transmission.toString().trim() : null,
+        fuelType: formData.fuelType && formData.fuelType.toString().trim() ? formData.fuelType.toString().trim() : null,
+        color: formData.color && formData.color.toString().trim() ? formData.color.toString().trim() : null,
+        description: formData.description && formData.description.toString().trim() ? formData.description.toString().trim() : null,
         images: images,
         featured: formData.featured === true || formData.featured === 'true',
       };
 
       console.log('Submitting car data:', { ...carData, images: `${images.length} images` });
+      console.log('Data types:', {
+        make: typeof carData.make,
+        model: typeof carData.model,
+        year: typeof carData.year,
+        price: typeof carData.price,
+        images: Array.isArray(carData.images),
+      });
 
       const response = await fetch('/api/cars', {
         method: 'POST',
@@ -260,13 +273,18 @@ export default function NewCarPage() {
         }, 500);
       } else {
         let errorMessage = 'Failed to create car. Please check all required fields.';
+        let errorDetails = '';
         try {
           const errorData = await response.json();
           errorMessage = errorData.error || errorMessage;
+          errorDetails = errorData.details || '';
+          console.error('Car creation error:', errorData);
         } catch (e) {
+          const text = await response.text().catch(() => '');
+          console.error('Failed to parse error response:', text);
           errorMessage = `Server error (${response.status}). Please try again.`;
         }
-        setSubmitError(errorMessage);
+        setSubmitError(errorDetails ? `${errorMessage}\n\nDetails: ${errorDetails}` : errorMessage);
       }
     } catch (error: any) {
       console.error('Error creating car:', error);
@@ -366,7 +384,10 @@ export default function NewCarPage() {
                   min="1900"
                   max={new Date().getFullYear() + 1}
                   value={formData.year}
-                  onChange={(e) => setFormData({ ...formData, year: parseInt(e.target.value) || new Date().getFullYear() })}
+                  onChange={(e) => {
+                    const value = parseInt(e.target.value);
+                    setFormData({ ...formData, year: isNaN(value) ? new Date().getFullYear() : value });
+                  }}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900"
                 />
               </div>
@@ -401,7 +422,10 @@ export default function NewCarPage() {
                   min="0"
                   step="0.01"
                   value={formData.price}
-                  onChange={(e) => setFormData({ ...formData, price: e.target.value })}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setFormData({ ...formData, price: value === '' ? '' : parseFloat(value) || 0 });
+                  }}
                   className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-gray-900"
                   placeholder="0.00"
                 />

@@ -35,6 +35,15 @@ export async function GET() {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if Prisma is available
+    if (!prisma || !prisma.car) {
+      console.error('Prisma client not initialized');
+      return NextResponse.json(
+        { error: 'Database connection error. Please check your database configuration.' },
+        { status: 500 }
+      );
+    }
+
     const body = await request.json();
     console.log('Received car data:', { ...body, images: Array.isArray(body.images) ? `${body.images.length} images` : 'not an array' });
 
@@ -125,8 +134,26 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ ...car, images: parsedImages }, { status: 201 });
   } catch (error: any) {
     console.error('Error creating car:', error);
+    console.error('Error details:', {
+      message: error?.message,
+      code: error?.code,
+      meta: error?.meta,
+      stack: error?.stack,
+    });
+    
+    // Provide more specific error messages
+    let errorMessage = 'Failed to create car. Please check all fields and try again.';
+    
+    if (error?.code === 'P2002') {
+      errorMessage = 'A car with this information already exists.';
+    } else if (error?.code === 'P1001') {
+      errorMessage = 'Cannot reach database. Please check your database connection.';
+    } else if (error?.message) {
+      errorMessage = error.message;
+    }
+    
     return NextResponse.json(
-      { error: error?.message || 'Failed to create car. Please check all fields and try again.' },
+      { error: errorMessage, details: process.env.NODE_ENV === 'development' ? error?.message : undefined },
       { status: 500 }
     );
   }
