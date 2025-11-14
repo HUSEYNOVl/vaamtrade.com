@@ -3,6 +3,11 @@ import ContactForm from '@/components/ContactForm';
 import ImageCarousel from '@/components/ImageCarousel';
 import { prisma } from '@/lib/prisma';
 import { parseImages } from '@/lib/utils';
+import { routing } from '@/i18n/routing';
+
+export function generateStaticParams() {
+  return routing.locales.map((locale) => ({ locale }));
+}
 
 export default async function BMWX5Page({
   params,
