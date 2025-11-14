@@ -5,6 +5,9 @@ import { prisma } from '@/lib/prisma';
 import { parseImages } from '@/lib/utils';
 import { routing } from '@/i18n/routing';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export function generateStaticParams() {
   return routing.locales.map((locale) => ({ locale }));
 }
