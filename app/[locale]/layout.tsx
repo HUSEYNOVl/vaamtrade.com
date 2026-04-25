@@ -36,60 +36,103 @@ export default async function LocaleLayout({
         <main className="flex-grow">{children}</main>
         <FloatingContactIcons />
 
-        <footer className="bg-white border-t border-[var(--border)]">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-10 mb-10">
-              {/* Brand */}
-              <div className="md:col-span-2">
-                <div className="flex items-center gap-2.5 mb-3">
-                  <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-black" style={{ background: 'var(--accent)' }}>V</div>
-                  <span className="font-extrabold text-lg" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text)' }}>
+        <footer className="relative overflow-hidden" style={{ background: '#080807' }}>
+          {/* Subtle top glow */}
+          <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(90deg, transparent, rgba(200,50,26,0.4), transparent)' }} />
+
+          {/* Dot grid */}
+          <div className="absolute inset-0 opacity-[0.025]" style={{ backgroundImage: 'radial-gradient(circle, #c8321a 1px, transparent 1px)', backgroundSize: '22px 22px' }} />
+
+          {/* Glow orb */}
+          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[600px] h-64 pointer-events-none" style={{ background: 'radial-gradient(ellipse, rgba(200,50,26,0.07) 0%, transparent 70%)', filter: 'blur(20px)' }} />
+
+          <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* Main grid */}
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-10 py-16 border-b border-white/5">
+              {/* Brand — wide col */}
+              <div className="md:col-span-5">
+                <div className="flex items-center gap-2.5 mb-5">
+                  <div className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-black" style={{ background: 'var(--accent)', boxShadow: '0 4px 16px rgba(200,50,26,0.4)' }}>V</div>
+                  <span className="font-extrabold text-xl text-white" style={{ fontFamily: 'Syne, sans-serif' }}>
                     VAAM <span style={{ color: 'var(--accent)' }}>Motors</span>
                   </span>
                 </div>
-                <p className="text-sm leading-relaxed max-w-xs" style={{ color: 'var(--text-muted)' }}>
+                <p className="text-gray-500 text-sm leading-relaxed max-w-xs mb-6">
                   Licensed import-export company delivering premium vehicles to customers in 50+ countries since 2014.
                 </p>
+                {/* Trust badges */}
+                <div className="flex flex-wrap gap-2">
+                  {['🛡 Licensed Exporter', '✅ Certified Inspection', '🌍 50+ Countries'].map((b) => (
+                    <span key={b} className="text-xs px-3 py-1.5 rounded-full font-medium text-gray-400" style={{ background: 'rgba(255,255,255,0.05)', border: '1px solid rgba(255,255,255,0.08)' }}>
+                      {b}
+                    </span>
+                  ))}
+                </div>
               </div>
 
-              {/* Links */}
-              <div>
-                <h4 className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: 'var(--text)' }}>Navigate</h4>
-                <ul className="space-y-2.5 text-sm">
+              {/* Navigate */}
+              <div className="md:col-span-2 md:col-start-7">
+                <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-5 text-white">Navigate</h4>
+                <ul className="space-y-3">
                   {[
                     { href: '/' as const, label: t('home') },
                     { href: '/about' as const, label: t('about') },
                     { href: '/contact' as const, label: t('contact') },
                   ].map((l) => (
                     <li key={l.href}>
-                      <Link href={l.href} className="transition-colors hover:text-[var(--accent)]" style={{ color: 'var(--text-muted)' }}>{l.label}</Link>
+                      <Link
+                        href={l.href}
+                        className="text-sm text-gray-500 transition-all duration-200 hover:text-white hover:pl-1 flex items-center gap-1.5 group"
+                      >
+                        <span className="w-0 group-hover:w-3 overflow-hidden transition-all duration-200 text-[var(--accent)]">→</span>
+                        {l.label}
+                      </Link>
                     </li>
                   ))}
                 </ul>
               </div>
 
               {/* Contact */}
-              <div>
-                <h4 className="text-xs font-bold uppercase tracking-widest mb-4" style={{ color: 'var(--text)' }}>Contact</h4>
-                <ul className="space-y-2.5 text-sm" style={{ color: 'var(--text-muted)' }}>
+              <div className="md:col-span-3 md:col-start-10">
+                <h4 className="text-xs font-bold uppercase tracking-[0.2em] mb-5 text-white">Contact</h4>
+                <ul className="space-y-3">
                   {contactInfo.email && (
-                    <li><a href={`mailto:${contactInfo.email}`} className="hover:text-[var(--accent)] transition-colors">📧 {contactInfo.email}</a></li>
-                  )}
-                  {contactInfo.whatsappNumber && (
                     <li>
-                      <a href={`https://wa.me/${contactInfo.whatsappNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="hover:text-[var(--accent)] transition-colors">
-                        📱 {contactInfo.whatsappNumber}
+                      <a href={`mailto:${contactInfo.email}`} className="flex items-center gap-3 text-sm text-gray-500 hover:text-white transition-colors group">
+                        <span className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0 transition-colors" style={{ background: 'rgba(255,255,255,0.05)' }}>✉</span>
+                        <span className="truncate">{contactInfo.email}</span>
                       </a>
                     </li>
                   )}
-                  {contactInfo.businessHours && <li>🕐 {contactInfo.businessHours}</li>}
+                  {contactInfo.whatsappNumber && (
+                    <li>
+                      <a href={`https://wa.me/${contactInfo.whatsappNumber.replace(/[^0-9]/g, '')}`} target="_blank" rel="noopener noreferrer" className="flex items-center gap-3 text-sm text-gray-500 hover:text-white transition-colors">
+                        <span className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(37,211,102,0.1)' }}>📱</span>
+                        {contactInfo.whatsappNumber}
+                      </a>
+                    </li>
+                  )}
+                  {contactInfo.businessHours && (
+                    <li className="flex items-center gap-3 text-sm text-gray-600">
+                      <span className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style={{ background: 'rgba(255,255,255,0.05)' }}>🕐</span>
+                      {contactInfo.businessHours}
+                    </li>
+                  )}
                 </ul>
               </div>
             </div>
 
-            <div className="border-t border-[var(--border)] pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs" style={{ color: 'var(--text-muted)' }}>
-              <p>&copy; {new Date().getFullYear()} VAAM Motors. All rights reserved.</p>
-              <a href="/admin" className="hover:text-[var(--accent)] transition-colors">Admin Panel →</a>
+            {/* Bottom bar */}
+            <div className="py-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+              <p className="text-xs text-gray-600">
+                &copy; {new Date().getFullYear()} VAAM Motors. All rights reserved.
+              </p>
+              <div className="flex items-center gap-5">
+                <span className="text-xs text-gray-700">Global Auto Export</span>
+                <a href="/admin" className="text-xs text-gray-600 hover:text-[var(--accent)] transition-colors">
+                  Admin →
+                </a>
+              </div>
             </div>
           </div>
         </footer>

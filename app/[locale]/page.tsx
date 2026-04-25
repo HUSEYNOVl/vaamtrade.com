@@ -6,6 +6,7 @@ import HomePageClient from '@/components/HomePageClient';
 import AnimatedHero from '@/components/AnimatedHero';
 import StatsStrip from '@/components/StatsStrip';
 import HowItWorks from '@/components/HowItWorks';
+import CTABanner from '@/components/CTABanner';
 
 export default async function HomePage({
   params,
@@ -86,33 +87,7 @@ export default async function HomePage({
       </section>
 
       {/* CTA banner */}
-      <section className="border-t border-[var(--border)]" style={{ background: 'var(--accent)' }}>
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-14 text-center text-white">
-          <h2 className="text-3xl md:text-4xl font-extrabold mb-3" style={{ fontFamily: 'Syne, sans-serif' }}>
-            Can&apos;t find what you&apos;re looking for?
-          </h2>
-          <p className="text-red-100 mb-7 max-w-lg mx-auto">
-            We source vehicles to order. Tell us exactly what you want and we&apos;ll find it.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-3 justify-center">
-            <a
-              href="/contact"
-              className="btn bg-white font-bold px-8 py-3 rounded-xl"
-              style={{ color: 'var(--accent)' }}
-            >
-              Request a Vehicle
-            </a>
-            <a
-              href="https://wa.me/1234567890"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="btn bg-green-500 hover:bg-green-600 text-white font-bold px-8 py-3 rounded-xl"
-            >
-              💬 WhatsApp
-            </a>
-          </div>
-        </div>
-      </section>
+      <CTABanner />
     </div>
   );
 }
