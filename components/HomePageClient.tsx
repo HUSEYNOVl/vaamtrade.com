@@ -30,165 +30,233 @@ export default function HomePageClient({ cars, car }: HomePageClientProps) {
   if (car) return <CarCard car={car} />;
 
   const applyFilters = (list: Car[]) => {
-    let result = [...list];
+    let r = [...list];
     if (search) {
       const q = search.toLowerCase();
-      result = result.filter((c) =>
-        c.make.toLowerCase().includes(q) ||
-        c.model.toLowerCase().includes(q) ||
-        c.year.toString().includes(q)
-      );
+      r = r.filter((c) => c.make.toLowerCase().includes(q) || c.model.toLowerCase().includes(q) || c.year.toString().includes(q));
     }
-    if (condition) result = result.filter((c) => c.condition === condition);
-    if (transmission) result = result.filter((c) => c.transmission === transmission);
-    if (fuelType) result = result.filter((c) => c.fuelType === fuelType);
-    if (minPrice) result = result.filter((c) => c.price >= parseFloat(minPrice));
-    if (maxPrice) result = result.filter((c) => c.price <= parseFloat(maxPrice));
-
-    if (sortBy === 'newest') result.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-    else if (sortBy === 'price-asc') result.sort((a, b) => a.price - b.price);
-    else if (sortBy === 'price-desc') result.sort((a, b) => b.price - a.price);
-    else if (sortBy === 'year-desc') result.sort((a, b) => b.year - a.year);
-
-    return result;
+    if (condition) r = r.filter((c) => c.condition === condition);
+    if (transmission) r = r.filter((c) => c.transmission === transmission);
+    if (fuelType) r = r.filter((c) => c.fuelType === fuelType);
+    if (minPrice) r = r.filter((c) => c.price >= parseFloat(minPrice));
+    if (maxPrice) r = r.filter((c) => c.price <= parseFloat(maxPrice));
+    if (sortBy === 'newest') r.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+    else if (sortBy === 'price-asc') r.sort((a, b) => a.price - b.price);
+    else if (sortBy === 'price-desc') r.sort((a, b) => b.price - a.price);
+    else if (sortBy === 'year-desc') r.sort((a, b) => b.year - a.year);
+    return r;
   };
 
-  const clearFilters = () => {
-    setSearch(''); setCondition(''); setTransmission('');
-    setFuelType(''); setMinPrice(''); setMaxPrice(''); setSortBy('newest');
-  };
-
-  const hasFilters = search || condition || transmission || fuelType || minPrice || maxPrice;
-
+  const clearFilters = () => { setSearch(''); setCondition(''); setTransmission(''); setFuelType(''); setMinPrice(''); setMaxPrice(''); setSortBy('newest'); };
+  const hasFilters = !!(search || condition || transmission || fuelType || minPrice || maxPrice);
   const transmissions = [...new Set((cars || []).map((c) => c.transmission).filter(Boolean))].sort() as string[];
   const fuels = [...new Set((cars || []).map((c) => c.fuelType).filter(Boolean))].sort() as string[];
 
+  /* ── Filter Panel ─────────────────────────────────── */
   const FilterPanel = () => (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h3 className="font-bold text-[var(--text)] text-base" style={{ fontFamily: 'Syne, sans-serif' }}>Filters</h3>
+    <div>
+      {/* Header */}
+      <div className="flex items-center justify-between mb-5 pb-4" style={{ borderBottom: '1.5px solid var(--border)' }}>
+        <div className="flex items-center gap-2">
+          <svg className="w-4 h-4" style={{ color: 'var(--accent)' }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
+          </svg>
+          <span className="font-bold text-sm text-[var(--text)]" style={{ fontFamily: 'Syne, sans-serif' }}>Filters</span>
+          {hasFilters && (
+            <span className="w-5 h-5 rounded-full text-white text-xs font-bold flex items-center justify-center" style={{ background: 'var(--accent)' }}>
+              {[search, condition, transmission, fuelType, minPrice || maxPrice ? 'p' : ''].filter(Boolean).length}
+            </span>
+          )}
+        </div>
         {hasFilters && (
           <button onClick={clearFilters} className="text-xs font-semibold hover:underline" style={{ color: 'var(--accent)' }}>
-            Clear all
+            Reset
           </button>
         )}
       </div>
 
-      <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>Search</label>
-        <div className="relative">
-          <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-          </svg>
-          <input type="text" value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Make, model, year…" className="input-base pl-9" />
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>Condition</label>
-        <div className="flex gap-2">
-          {['', 'New', 'Used'].map((v) => (
-            <button
-              key={v}
-              onClick={() => setCondition(v)}
-              className="flex-1 py-2 text-sm rounded-lg border transition-all font-medium"
-              style={{
-                borderColor: condition === v ? 'var(--accent)' : 'var(--border)',
-                background: condition === v ? 'var(--accent-light)' : 'white',
-                color: condition === v ? 'var(--accent)' : 'var(--text-muted)',
-              }}
-            >
-              {v || 'All'}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      <div>
-        <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>Price (USD)</label>
-        <div className="flex gap-2">
-          <input type="number" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} placeholder="Min" className="input-base" />
-          <input type="number" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} placeholder="Max" className="input-base" />
-        </div>
-      </div>
-
-      {transmissions.length > 0 && (
+      <div className="space-y-5">
+        {/* Search */}
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>Transmission</label>
-          <select value={transmission} onChange={(e) => setTransmission(e.target.value)} className="input-base">
-            <option value="">Any</option>
-            {transmissions.map((t) => <option key={t} value={t}>{t}</option>)}
-          </select>
+          <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>Keyword</label>
+          <div className="relative">
+            <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text" value={search} onChange={(e) => setSearch(e.target.value)}
+              placeholder="Make, model, year…" className="input-base pl-9 text-sm"
+            />
+          </div>
         </div>
-      )}
 
-      {fuels.length > 0 && (
+        {/* Condition pills */}
         <div>
-          <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>Fuel Type</label>
-          <select value={fuelType} onChange={(e) => setFuelType(e.target.value)} className="input-base">
-            <option value="">Any</option>
-            {fuels.map((f) => <option key={f} value={f}>{f}</option>)}
-          </select>
+          <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>Condition</label>
+          <div className="flex gap-2">
+            {[
+              { v: '', label: 'All' },
+              { v: 'New', label: '🆕 New' },
+              { v: 'Used', label: '🔧 Used' },
+            ].map(({ v, label }) => (
+              <button
+                key={v} onClick={() => setCondition(v)}
+                className="flex-1 py-2 text-xs rounded-lg border font-semibold transition-all duration-150"
+                style={{
+                  borderColor: condition === v ? 'var(--accent)' : 'var(--border)',
+                  background: condition === v ? 'var(--accent-light)' : 'white',
+                  color: condition === v ? 'var(--accent)' : 'var(--text-muted)',
+                }}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
-      )}
+
+        {/* Price range */}
+        <div>
+          <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>Price Range (USD)</label>
+          <div className="flex gap-2 items-center">
+            <input type="number" value={minPrice} onChange={(e) => setMinPrice(e.target.value)} placeholder="Min" className="input-base text-sm" />
+            <span className="text-gray-300 text-sm shrink-0">—</span>
+            <input type="number" value={maxPrice} onChange={(e) => setMaxPrice(e.target.value)} placeholder="Max" className="input-base text-sm" />
+          </div>
+        </div>
+
+        {/* Transmission */}
+        {transmissions.length > 0 && (
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>Transmission</label>
+            <div className="flex flex-wrap gap-1.5">
+              {['', ...transmissions].map((t) => (
+                <button
+                  key={t} onClick={() => setTransmission(t)}
+                  className="px-3 py-1.5 rounded-lg text-xs border font-medium transition-all duration-150"
+                  style={{
+                    borderColor: transmission === t ? 'var(--accent)' : 'var(--border)',
+                    background: transmission === t ? 'var(--accent-light)' : 'white',
+                    color: transmission === t ? 'var(--accent)' : 'var(--text-muted)',
+                  }}
+                >
+                  {t || 'Any'}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Fuel type */}
+        {fuels.length > 0 && (
+          <div>
+            <label className="block text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: 'var(--text-muted)' }}>Fuel Type</label>
+            <div className="flex flex-wrap gap-1.5">
+              {['', ...fuels].map((f) => (
+                <button
+                  key={f} onClick={() => setFuelType(f)}
+                  className="px-3 py-1.5 rounded-lg text-xs border font-medium transition-all duration-150"
+                  style={{
+                    borderColor: fuelType === f ? 'var(--accent)' : 'var(--border)',
+                    background: fuelType === f ? 'var(--accent-light)' : 'white',
+                    color: fuelType === f ? 'var(--accent)' : 'var(--text-muted)',
+                  }}
+                >
+                  {f || 'Any'}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 
   if (!cars || cars.length === 0) {
     return (
-      <div className="text-center py-20">
-        <div className="w-20 h-20 bg-[var(--bg)] rounded-full flex items-center justify-center mx-auto mb-4">
-          <svg className="w-10 h-10 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 17a2 2 0 11-4 0 2 2 0 014 0zM19 17a2 2 0 11-4 0 2 2 0 014 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10l1 1h10a1 1 0 001-1zm0 0l1.5-5H18a2 2 0 012 2v3h-7z" />
-          </svg>
-        </div>
-        <p className="font-medium mb-2" style={{ color: 'var(--text-muted)' }}>No cars in inventory yet</p>
+      <div className="text-center py-24 rounded-2xl border border-dashed border-[var(--border)]">
+        <div className="text-5xl mb-4">🚗</div>
+        <p className="font-semibold text-[var(--text-muted)] mb-1">No vehicles yet</p>
         <p className="text-sm text-gray-400">Check back soon or contact us to source a vehicle</p>
       </div>
     );
   }
 
   return (
-    <div className="flex gap-8">
-      <aside className="hidden lg:block w-60 shrink-0">
-        <div className="bg-white rounded-xl border border-[var(--border)] p-5 sticky top-24">
+    <div className="flex gap-7">
+      {/* Desktop sidebar */}
+      <aside className="hidden lg:block w-56 shrink-0">
+        <div
+          className="rounded-2xl border p-5 sticky top-24"
+          style={{ background: 'white', borderColor: 'var(--border)' }}
+        >
           <FilterPanel />
         </div>
       </aside>
 
+      {/* Main area */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-center justify-between mb-5 gap-3 flex-wrap">
+
+        {/* Toolbar */}
+        <div
+          className="flex items-center justify-between gap-3 flex-wrap mb-5 px-4 py-3 rounded-xl border bg-white"
+          style={{ borderColor: 'var(--border)' }}
+        >
           <div className="flex items-center gap-3">
-            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="lg:hidden btn btn-outline text-sm gap-2">
-              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h18v2H3V4zm3 7h12v2H6v-2zm4 7h4v2h-4v-2z" />
+            {/* Mobile filter btn */}
+            <button
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              className="lg:hidden flex items-center gap-1.5 px-3 py-1.5 rounded-lg border text-sm font-medium transition-colors"
+              style={{
+                borderColor: sidebarOpen || hasFilters ? 'var(--accent)' : 'var(--border)',
+                color: sidebarOpen || hasFilters ? 'var(--accent)' : 'var(--text-muted)',
+                background: sidebarOpen || hasFilters ? 'var(--accent-light)' : 'white',
+              }}
+            >
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2a1 1 0 01-.293.707L13 13.414V19a1 1 0 01-.553.894l-4 2A1 1 0 017 21v-7.586L3.293 6.707A1 1 0 013 6V4z" />
               </svg>
-              Filters {hasFilters && <span className="w-2 h-2 rounded-full" style={{ background: 'var(--accent)' }} />}
+              Filters
+              {hasFilters && <span className="w-4 h-4 rounded-full text-white text-[10px] font-bold flex items-center justify-center" style={{ background: 'var(--accent)' }}>!</span>}
             </button>
+
             <p className="text-sm" style={{ color: 'var(--text-muted)' }}>
-              <span className="font-bold" style={{ color: 'var(--text)' }}>{filtered.length}</span> vehicles found
+              <span className="font-bold" style={{ color: 'var(--text)' }}>{filtered.length}</span>
+              <span className="ml-1">vehicle{filtered.length !== 1 ? 's' : ''}</span>
             </p>
           </div>
-          <div className="flex items-center gap-3">
-            <select value={sortBy} onChange={(e) => setSortBy(e.target.value)} className="input-base !w-auto text-sm py-2">
+
+          <div className="flex items-center gap-2">
+            <select
+              value={sortBy} onChange={(e) => setSortBy(e.target.value)}
+              className="text-sm border rounded-lg px-3 py-1.5 outline-none cursor-pointer transition-colors"
+              style={{ borderColor: 'var(--border)', color: 'var(--text)', background: 'white' }}
+            >
               <option value="newest">Newest First</option>
-              <option value="price-asc">Price: Low → High</option>
-              <option value="price-desc">Price: High → Low</option>
-              <option value="year-desc">Year: Newest</option>
+              <option value="price-asc">Price ↑</option>
+              <option value="price-desc">Price ↓</option>
+              <option value="year-desc">Newest Year</option>
             </select>
-            <div className="hidden sm:flex border border-[var(--border)] rounded-lg overflow-hidden">
+
+            {/* Layout toggle */}
+            <div className="hidden sm:flex rounded-lg overflow-hidden border" style={{ borderColor: 'var(--border)' }}>
               {(['grid', 'list'] as Layout[]).map((l) => (
                 <button
-                  key={l}
-                  onClick={() => setLayout(l)}
-                  className="p-2 transition-colors"
-                  style={{ background: layout === l ? 'var(--accent)' : 'white', color: layout === l ? 'white' : 'var(--text-muted)' }}
+                  key={l} onClick={() => setLayout(l)}
+                  className="p-2 transition-all duration-150"
+                  style={{
+                    background: layout === l ? 'var(--accent)' : 'white',
+                    color: layout === l ? 'white' : 'var(--text-muted)',
+                  }}
+                  title={l === 'grid' ? 'Grid view' : 'List view'}
                 >
                   {l === 'grid' ? (
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 3h7v7H3V3zm11 0h7v7h-7V3zm0 11h7v7h-7v-7zM3 14h7v7H3v-7z" /></svg>
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 16 16">
+                      <path d="M1 2.5A1.5 1.5 0 012.5 1h3A1.5 1.5 0 017 2.5v3A1.5 1.5 0 015.5 7h-3A1.5 1.5 0 011 5.5v-3zm8 0A1.5 1.5 0 0110.5 1h3A1.5 1.5 0 0115 2.5v3A1.5 1.5 0 0113.5 7h-3A1.5 1.5 0 019 5.5v-3zm-8 8A1.5 1.5 0 012.5 9h3A1.5 1.5 0 017 10.5v3A1.5 1.5 0 015.5 15h-3A1.5 1.5 0 011 13.5v-3zm8 0A1.5 1.5 0 0110.5 9h3A1.5 1.5 0 0115 10.5v3A1.5 1.5 0 0113.5 15h-3A1.5 1.5 0 019 13.5v-3z" />
+                    </svg>
                   ) : (
-                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24"><path d="M3 4h18v2H3V4zm0 7h18v2H3v-2zm0 7h18v2H3v-2z" /></svg>
+                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 16 16">
+                      <path fillRule="evenodd" d="M2 2.5a.5.5 0 00-.5.5v1a.5.5 0 00.5.5h12a.5.5 0 00.5-.5V3a.5.5 0 00-.5-.5H2zm0 5a.5.5 0 00-.5.5v1a.5.5 0 00.5.5h12a.5.5 0 00.5-.5v-1a.5.5 0 00-.5-.5H2zm0 5a.5.5 0 00-.5.5v1a.5.5 0 00.5.5h12a.5.5 0 00.5-.5v-1a.5.5 0 00-.5-.5H2z" />
+                    </svg>
                   )}
                 </button>
               ))}
@@ -196,26 +264,55 @@ export default function HomePageClient({ cars, car }: HomePageClientProps) {
           </div>
         </div>
 
+        {/* Mobile filter drawer */}
         {sidebarOpen && (
-          <div className="lg:hidden bg-white rounded-xl border border-[var(--border)] p-5 mb-5">
+          <div className="lg:hidden bg-white rounded-2xl border border-[var(--border)] p-5 mb-5">
             <FilterPanel />
           </div>
         )}
 
+        {/* Active chips */}
         {hasFilters && (
           <div className="flex flex-wrap gap-2 mb-4">
-            {search && <span className="tag">🔍 &quot;{search}&quot; <button onClick={() => setSearch('')} className="ml-1">×</button></span>}
-            {condition && <span className="tag">{condition} <button onClick={() => setCondition('')} className="ml-1">×</button></span>}
-            {transmission && <span className="tag">{transmission} <button onClick={() => setTransmission('')} className="ml-1">×</button></span>}
-            {fuelType && <span className="tag">{fuelType} <button onClick={() => setFuelType('')} className="ml-1">×</button></span>}
-            {(minPrice || maxPrice) && <span className="tag">Price filtered <button onClick={() => { setMinPrice(''); setMaxPrice(''); }} className="ml-1">×</button></span>}
+            {search && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border" style={{ background: 'var(--accent-light)', color: 'var(--accent)', borderColor: 'rgba(200,50,26,0.2)' }}>
+                🔍 &quot;{search}&quot;
+                <button onClick={() => setSearch('')} className="hover:opacity-70 font-bold">×</button>
+              </span>
+            )}
+            {condition && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border" style={{ background: 'var(--accent-light)', color: 'var(--accent)', borderColor: 'rgba(200,50,26,0.2)' }}>
+                {condition}
+                <button onClick={() => setCondition('')} className="hover:opacity-70 font-bold">×</button>
+              </span>
+            )}
+            {transmission && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border" style={{ background: 'var(--accent-light)', color: 'var(--accent)', borderColor: 'rgba(200,50,26,0.2)' }}>
+                {transmission}
+                <button onClick={() => setTransmission('')} className="hover:opacity-70 font-bold">×</button>
+              </span>
+            )}
+            {fuelType && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border" style={{ background: 'var(--accent-light)', color: 'var(--accent)', borderColor: 'rgba(200,50,26,0.2)' }}>
+                {fuelType}
+                <button onClick={() => setFuelType('')} className="hover:opacity-70 font-bold">×</button>
+              </span>
+            )}
+            {(minPrice || maxPrice) && (
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border" style={{ background: 'var(--accent-light)', color: 'var(--accent)', borderColor: 'rgba(200,50,26,0.2)' }}>
+                ${minPrice || '0'} – ${maxPrice || '∞'}
+                <button onClick={() => { setMinPrice(''); setMaxPrice(''); }} className="hover:opacity-70 font-bold">×</button>
+              </span>
+            )}
           </div>
         )}
 
+        {/* Results */}
         {filtered.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-xl border border-[var(--border)]">
-            <p className="font-medium mb-2" style={{ color: 'var(--text-muted)' }}>No results match your filters</p>
-            <button onClick={clearFilters} className="btn btn-primary text-sm mt-2">Clear Filters</button>
+          <div className="text-center py-16 rounded-2xl border border-dashed border-[var(--border)] bg-white">
+            <div className="text-4xl mb-3">🔍</div>
+            <p className="font-semibold text-[var(--text-muted)] mb-3">No vehicles match your filters</p>
+            <button onClick={clearFilters} className="btn btn-primary text-sm px-5">Clear All Filters</button>
           </div>
         ) : layout === 'grid' ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
