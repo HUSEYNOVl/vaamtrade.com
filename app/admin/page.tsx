@@ -2,164 +2,165 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { formatPrice } from '@/lib/utils';
+
+interface Car {
+  id: string;
+  make: string;
+  model: string;
+  year: number;
+  price: number;
+  currency: string;
+  condition: string;
+  featured: boolean;
+  createdAt: string;
+}
 
 export default function AdminDashboard() {
-  const [stats, setStats] = useState({
-    totalCars: 0,
-    featuredCars: 0,
-    newCars: 0,
-    usedCars: 0,
-  });
+  const [cars, setCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchStats();
+    fetch('/api/cars')
+      .then((r) => r.json())
+      .then((data) => { setCars(data); setLoading(false); })
+      .catch(() => setLoading(false));
   }, []);
 
-  const fetchStats = async () => {
-    try {
-      const response = await fetch('/api/cars');
-      if (response.ok) {
-        const cars = await response.json();
-        setStats({
-          totalCars: cars.length,
-          featuredCars: cars.filter((c: any) => c.featured).length,
-          newCars: cars.filter((c: any) => c.condition === 'New').length,
-          usedCars: cars.filter((c: any) => c.condition === 'Used').length,
-        });
-      }
-    } catch (error) {
-      console.error('Error fetching stats:', error);
-    } finally {
-      setLoading(false);
-    }
+  const stats = {
+    total: cars.length,
+    featured: cars.filter((c) => c.featured).length,
+    newCars: cars.filter((c) => c.condition === 'New').length,
+    used: cars.filter((c) => c.condition !== 'New').length,
   };
+
+  const recent = [...cars].sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()).slice(0, 6);
 
   if (loading) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[400px]">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mb-4"></div>
-        <div className="text-gray-600 font-semibold">Loading dashboard...</div>
+      <div className="flex items-center justify-center h-64">
+        <div className="flex flex-col items-center gap-3">
+          <div className="w-8 h-8 border-2 border-[var(--accent)] border-t-transparent rounded-full animate-spin" />
+          <p className="text-sm text-[var(--text-muted)]">Loading dashboard…</p>
+        </div>
       </div>
     );
   }
 
   return (
-    <div>
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900">Dashboard</h1>
-        <p className="text-gray-600 mt-2">Welcome to your admin panel. Manage your car inventory here.</p>
+    <div className="space-y-8">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-extrabold text-[var(--text)]" style={{ fontFamily: 'Syne, sans-serif' }}>Dashboard</h1>
+        <p className="text-sm text-[var(--text-muted)] mt-1">Welcome back — here&apos;s your inventory overview.</p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Total Cars</p>
-              <p className="text-3xl font-bold text-gray-900 mt-2">{stats.totalCars}</p>
-            </div>
-            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center">
-              <span className="text-2xl">🚗</span>
-            </div>
+      {/* Stat cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {[
+          { label: 'Total Inventory', value: stats.total, color: '#1a1a18', sub: 'vehicles listed' },
+          { label: 'Featured', value: stats.featured, color: '#d4a843', sub: 'highlighted listings' },
+          { label: 'New Cars', value: stats.newCars, color: '#1a6b3c', sub: 'new condition' },
+          { label: 'Used Cars', value: stats.used, color: '#c8321a', sub: 'pre-owned' },
+        ].map((s) => (
+          <div key={s.label} className="bg-white rounded-xl border border-[var(--border)] p-5">
+            <p className="text-xs font-semibold uppercase tracking-wider text-[var(--text-muted)] mb-3">{s.label}</p>
+            <p className="text-4xl font-black mb-1" style={{ fontFamily: 'Syne, sans-serif', color: s.color }}>{s.value}</p>
+            <p className="text-xs text-[var(--text-muted)]">{s.sub}</p>
           </div>
-        </div>
+        ))}
+      </div>
 
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Featured</p>
-              <p className="text-3xl font-bold text-yellow-600 mt-2">{stats.featuredCars}</p>
-            </div>
-            <div className="w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-              <span className="text-2xl">⭐</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">New Cars</p>
-              <p className="text-3xl font-bold text-green-600 mt-2">{stats.newCars}</p>
-            </div>
-            <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-              <span className="text-2xl">🆕</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 hover:shadow-md transition">
-          <div className="flex items-center justify-between">
-            <div>
-              <p className="text-sm font-semibold text-gray-600 uppercase tracking-wide">Used Cars</p>
-              <p className="text-3xl font-bold text-orange-600 mt-2">{stats.usedCars}</p>
-            </div>
-            <div className="w-12 h-12 bg-orange-100 rounded-lg flex items-center justify-center">
-              <span className="text-2xl">🔧</span>
-            </div>
-          </div>
+      {/* Quick actions */}
+      <div>
+        <h2 className="text-base font-bold text-[var(--text)] mb-4" style={{ fontFamily: 'Syne, sans-serif' }}>Quick Actions</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          {[
+            { href: '/admin/cars/new', label: 'Add New Car', desc: 'List a new vehicle', icon: '+', accent: true },
+            { href: '/admin/cars', label: 'Manage Inventory', desc: 'Edit or remove listings', icon: '📋', accent: false },
+            { href: '/admin/cms', label: 'CMS Settings', desc: 'Edit site content', icon: '✏', accent: false },
+          ].map((a) => (
+            <Link
+              key={a.href}
+              href={a.href}
+              className="flex items-center gap-4 p-4 bg-white rounded-xl border border-[var(--border)] hover:border-[var(--accent)] transition-all group"
+            >
+              <div
+                className="w-11 h-11 rounded-xl flex items-center justify-center text-lg font-bold shrink-0 transition-colors"
+                style={{
+                  background: a.accent ? 'var(--accent)' : 'var(--accent-light)',
+                  color: a.accent ? 'white' : 'var(--accent)',
+                }}
+              >
+                {a.icon}
+              </div>
+              <div>
+                <p className="font-semibold text-[var(--text)] text-sm group-hover:text-[var(--accent)] transition-colors">{a.label}</p>
+                <p className="text-xs text-[var(--text-muted)]">{a.desc}</p>
+              </div>
+            </Link>
+          ))}
         </div>
       </div>
 
-      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-        <div className="p-6 border-b border-gray-200">
-          <h2 className="text-xl font-bold text-gray-900">Quick Actions</h2>
-          <p className="text-sm text-gray-600 mt-1">Common tasks to manage your inventory</p>
+      {/* Recent listings */}
+      {recent.length > 0 && (
+        <div>
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-base font-bold text-[var(--text)]" style={{ fontFamily: 'Syne, sans-serif' }}>Recent Listings</h2>
+            <Link href="/admin/cars" className="text-xs font-semibold hover:underline" style={{ color: 'var(--accent)' }}>View all →</Link>
+          </div>
+          <div className="bg-white rounded-xl border border-[var(--border)] overflow-hidden">
+            <table className="min-w-full">
+              <thead>
+                <tr style={{ background: 'var(--bg)' }}>
+                  {['Vehicle', 'Year', 'Price', 'Condition', ''].map((h) => (
+                    <th key={h} className="px-5 py-3 text-left text-xs font-bold uppercase tracking-wider text-[var(--text-muted)]">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-[var(--border)]">
+                {recent.map((car) => (
+                  <tr key={car.id} className="hover:bg-[var(--bg)] transition-colors">
+                    <td className="px-5 py-3.5">
+                      <div className="flex items-center gap-2">
+                        <p className="font-semibold text-sm text-[var(--text)]">{car.make} {car.model}</p>
+                        {car.featured && <span className="badge text-xs" style={{ background: '#fef3c7', color: '#92400e' }}>⭐</span>}
+                      </div>
+                    </td>
+                    <td className="px-5 py-3.5 text-sm text-[var(--text-muted)]">{car.year}</td>
+                    <td className="px-5 py-3.5 text-sm font-bold" style={{ color: 'var(--accent)', fontFamily: 'Syne, sans-serif' }}>
+                      {formatPrice(car.price, car.currency)}
+                    </td>
+                    <td className="px-5 py-3.5">
+                      <span className="badge" style={{
+                        background: car.condition === 'New' ? '#dcfce7' : '#fff0ed',
+                        color: car.condition === 'New' ? '#166534' : 'var(--accent)',
+                      }}>
+                        {car.condition}
+                      </span>
+                    </td>
+                    <td className="px-5 py-3.5 text-right">
+                      <Link href={`/admin/cars/${car.id}`} className="text-xs font-semibold hover:underline" style={{ color: 'var(--accent)' }}>
+                        Edit
+                      </Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
-        <div className="p-6 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Link
-            href="/admin/cars/new"
-            className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:border-red-500 hover:bg-red-50 transition group"
-          >
-            <div className="w-12 h-12 bg-red-100 rounded-lg flex items-center justify-center group-hover:bg-red-200 transition">
-              <span className="text-2xl">➕</span>
-            </div>
-            <div>
-              <h3 className="font-bold text-gray-900 group-hover:text-red-600 transition">Add New Car</h3>
-              <p className="text-sm text-gray-600">Add a new vehicle to your inventory</p>
-            </div>
-          </Link>
+      )}
 
-          <Link
-            href="/admin/cars"
-            className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:border-gray-500 hover:bg-gray-50 transition group"
-          >
-            <div className="w-12 h-12 bg-gray-100 rounded-lg flex items-center justify-center group-hover:bg-gray-200 transition">
-              <span className="text-2xl">📋</span>
-            </div>
-            <div>
-              <h3 className="font-bold text-gray-900 group-hover:text-gray-700 transition">Manage Cars</h3>
-              <p className="text-sm text-gray-600">View, edit, or delete existing cars</p>
-            </div>
-          </Link>
-
-          <Link
-            href="/admin/contact"
-            className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition group"
-          >
-            <div className="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center group-hover:bg-blue-200 transition">
-              <span className="text-2xl">📞</span>
-            </div>
-            <div>
-              <h3 className="font-bold text-gray-900 group-hover:text-blue-600 transition">Contact Settings</h3>
-              <p className="text-sm text-gray-600">Update your contact information</p>
-            </div>
-          </Link>
-
-          <Link
-            href="/admin/cms"
-            className="flex items-center gap-4 p-4 border border-gray-200 rounded-lg hover:border-purple-500 hover:bg-purple-50 transition group"
-          >
-            <div className="w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center group-hover:bg-purple-200 transition">
-              <span className="text-2xl">🎨</span>
-            </div>
-            <div>
-              <h3 className="font-bold text-gray-900 group-hover:text-purple-600 transition">CMS System</h3>
-              <p className="text-sm text-gray-600">Manage all website content and settings</p>
-            </div>
-          </Link>
+      {cars.length === 0 && (
+        <div className="bg-white rounded-xl border border-[var(--border)] p-16 text-center">
+          <div className="text-5xl mb-4">🚗</div>
+          <h3 className="text-lg font-bold text-[var(--text)] mb-2" style={{ fontFamily: 'Syne, sans-serif' }}>No cars yet</h3>
+          <p className="text-sm text-[var(--text-muted)] mb-6">Add your first vehicle to get started.</p>
+          <Link href="/admin/cars/new" className="btn btn-primary text-sm px-6">Add Your First Car</Link>
         </div>
-      </div>
+      )}
     </div>
   );
 }

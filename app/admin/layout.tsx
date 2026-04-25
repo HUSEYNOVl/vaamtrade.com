@@ -1,79 +1,94 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import Link from 'next/link';
 
-export default function AdminLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+const NAV = [
+  { href: '/admin', label: 'Dashboard', icon: '▦' },
+  { href: '/admin/cars', label: 'Inventory', icon: '🚗' },
+  { href: '/admin/cars/new', label: 'Add Car', icon: '+' },
+  { href: '/admin/cms', label: 'CMS', icon: '✏' },
+];
+
+export default function AdminLayout({ children }: { children: React.ReactNode }) {
+  const [authed, setAuthed] = useState(false);
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    const auth = sessionStorage.getItem('adminAuth');
-    if (auth === 'true') {
-      setIsAuthenticated(true);
-    }
+    if (sessionStorage.getItem('adminAuth') === 'true') setAuthed(true);
   }, []);
 
-  const handleLogin = async (e: React.FormEvent) => {
+  const login = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+    setLoading(true);
+    setError('');
     try {
-      const response = await fetch('/api/admin/verify', {
+      const res = await fetch('/api/admin/verify', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ password }),
       });
-
-      if (response.ok) {
+      if (res.ok) {
         sessionStorage.setItem('adminAuth', 'true');
-        setIsAuthenticated(true);
-        setError('');
+        setAuthed(true);
       } else {
-        setError('Incorrect password');
+        setError('Incorrect password. Default: admin123');
       }
-    } catch (error) {
-      setError('Login failed. Please try again.');
+    } catch {
+      setError('Connection error. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleLogout = () => {
+  const logout = () => {
     sessionStorage.removeItem('adminAuth');
-    setIsAuthenticated(false);
+    setAuthed(false);
     router.push('/');
   };
 
-  if (!isAuthenticated) {
+  if (!authed) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
-          <h1 className="text-2xl font-bold mb-6 text-center text-black">Admin Login</h1>
-          <form onSubmit={handleLogin}>
-            <div className="mb-4">
-              <label htmlFor="password" className="block text-sm font-semibold mb-2 text-black">
-                Password
-              </label>
+      <div className="min-h-screen flex items-center justify-center" style={{ background: '#0f0f0e' }}>
+        <div className="w-full max-w-sm">
+          <div className="text-center mb-8">
+            <div className="w-12 h-12 rounded-xl flex items-center justify-center text-white text-lg font-black mx-auto mb-4" style={{ background: 'var(--accent)' }}>V</div>
+            <h1 className="text-2xl font-extrabold text-white mb-1" style={{ fontFamily: 'Syne, sans-serif' }}>Admin Access</h1>
+            <p className="text-gray-500 text-sm">VAAM Motors Management Panel</p>
+          </div>
+          <form onSubmit={login} className="space-y-4">
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-400 mb-2">Password</label>
               <input
                 type="password"
-                id="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500 text-black"
+                className="w-full px-4 py-3 rounded-xl border text-white text-sm outline-none transition-all"
+                style={{
+                  background: 'rgba(255,255,255,0.06)',
+                  borderColor: 'rgba(255,255,255,0.1)',
+                }}
+                placeholder="Enter admin password"
                 required
+                autoFocus
               />
             </div>
-            {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
+            {error && (
+              <p className="text-red-400 text-sm px-1">{error}</p>
+            )}
             <button
               type="submit"
-              className="w-full bg-red-600 text-white py-2 px-4 rounded-md hover:bg-red-700 font-semibold"
+              disabled={loading}
+              className="w-full py-3 rounded-xl font-bold text-white text-sm transition-all"
+              style={{ background: loading ? '#888' : 'var(--accent)' }}
             >
-              Login
+              {loading ? 'Verifying…' : 'Sign In →'}
             </button>
           </form>
         </div>
@@ -82,45 +97,92 @@ export default function AdminLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <nav className="bg-white border-b border-gray-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            <div className="flex items-center gap-8">
-              <Link href="/admin" className="text-xl font-bold text-black hover:text-red-600 transition">
-                🚗 VAAM Motors Admin
-              </Link>
-              <div className="hidden md:flex items-center gap-6">
-                <Link href="/admin" className="text-gray-700 hover:text-red-600 font-medium transition">
-                  Dashboard
-                </Link>
-                <Link href="/admin/cars" className="text-gray-700 hover:text-red-600 font-medium transition">
-                  Cars
-                </Link>
-                <Link href="/admin/contact" className="text-gray-700 hover:text-red-600 font-medium transition">
-                  Contact
-                </Link>
-                <Link href="/admin/cms" className="text-gray-700 hover:text-red-600 font-medium transition">
-                  CMS
-                </Link>
-                <Link href="/" target="_blank" className="text-gray-700 hover:text-red-600 font-medium transition">
-                  View Site →
-                </Link>
-              </div>
+    <div className="min-h-screen flex" style={{ background: '#f5f4f1' }}>
+      {/* Sidebar */}
+      <aside
+        className={`fixed inset-y-0 left-0 z-40 w-56 flex flex-col transition-transform duration-200 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} lg:translate-x-0 lg:static lg:flex`}
+        style={{ background: '#0f0f0e', minHeight: '100vh' }}
+      >
+        <div className="p-5 border-b border-white/8">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-black shrink-0" style={{ background: 'var(--accent)' }}>V</div>
+            <div>
+              <p className="text-white font-bold text-sm" style={{ fontFamily: 'Syne, sans-serif' }}>VAAM Motors</p>
+              <p className="text-gray-500 text-xs">Admin Panel</p>
             </div>
-            <button
-              onClick={handleLogout}
-              className="text-gray-700 hover:text-red-600 font-medium transition px-3 py-1 rounded hover:bg-gray-50"
-            >
-              Logout
-            </button>
           </div>
         </div>
-      </nav>
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {children}
-      </main>
+
+        <nav className="flex-1 p-3 space-y-1">
+          {NAV.map((item) => {
+            const active = pathname === item.href || (item.href !== '/admin' && pathname.startsWith(item.href));
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                onClick={() => setSidebarOpen(false)}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors"
+                style={{
+                  background: active ? 'rgba(200,50,26,0.15)' : 'transparent',
+                  color: active ? '#f0856a' : '#9ca3af',
+                }}
+              >
+                <span className="text-base w-5 text-center">{item.icon}</span>
+                {item.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        <div className="p-3 border-t border-white/8 space-y-1">
+          <Link
+            href="/"
+            target="_blank"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:text-gray-300 transition-colors"
+          >
+            <span className="w-5 text-center">↗</span>
+            View Site
+          </Link>
+          <button
+            onClick={logout}
+            className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-500 hover:text-red-400 transition-colors"
+          >
+            <span className="w-5 text-center">⏻</span>
+            Logout
+          </button>
+        </div>
+      </aside>
+
+      {/* Overlay */}
+      {sidebarOpen && (
+        <div className="fixed inset-0 bg-black/50 z-30 lg:hidden" onClick={() => setSidebarOpen(false)} />
+      )}
+
+      {/* Main */}
+      <div className="flex-1 flex flex-col min-w-0">
+        {/* Top bar */}
+        <header className="bg-white border-b border-[var(--border)] px-6 h-14 flex items-center justify-between sticky top-0 z-20">
+          <button
+            onClick={() => setSidebarOpen(true)}
+            className="lg:hidden p-1 rounded-lg hover:bg-gray-100 text-gray-500"
+          >
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+          </button>
+          <p className="text-sm font-semibold text-[var(--text)] lg:hidden">Admin Panel</p>
+          <div className="hidden lg:block" />
+          <div className="flex items-center gap-3">
+            <Link href="/admin/cars/new" className="btn btn-primary text-xs px-4 py-2">
+              + Add Car
+            </Link>
+          </div>
+        </header>
+
+        <main className="flex-1 p-6 max-w-6xl mx-auto w-full">
+          {children}
+        </main>
+      </div>
     </div>
   );
 }
-

@@ -7,109 +7,95 @@ import LanguageSwitcher from './LanguageSwitcher';
 
 export default function Navigation() {
   const t = useTranslations('Navigation');
-  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
-  const [scrollProgress, setScrollProgress] = useState(0);
+  const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const y = window.scrollY;
-      setScrolled(y > 20);
+    const onScroll = () => {
+      setScrolled(window.scrollY > 8);
       const total = document.documentElement.scrollHeight - window.innerHeight;
-      setScrollProgress(total > 0 ? (y / total) * 100 : 0);
+      setProgress(total > 0 ? (window.scrollY / total) * 100 : 0);
     };
-    window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    return () => window.removeEventListener('scroll', onScroll);
   }, []);
 
   return (
     <>
-      <div className="scroll-progress" style={{ width: `${scrollProgress}%` }} />
+      <div className="scroll-progress" style={{ width: `${progress}%` }} />
 
       <nav
-        className="sticky top-0 z-50 transition-all duration-500"
+        className="sticky top-0 z-50 bg-white transition-shadow duration-300"
         style={{
-          background: scrolled ? 'rgba(5,5,5,0.92)' : 'rgba(10,10,10,0.82)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          borderBottom: scrolled ? '1px solid rgba(255,255,255,0.08)' : '1px solid transparent',
-          boxShadow: scrolled ? '0 8px 40px rgba(0,0,0,0.5)' : 'none',
+          borderBottom: '1.5px solid var(--border)',
+          boxShadow: scrolled ? '0 2px 20px rgba(0,0,0,0.07)' : 'none',
         }}
       >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
-            <div className="flex items-center gap-4 md:gap-10">
-              <Link href="/" className="group flex items-center gap-2.5">
-                <div className="w-9 h-9 bg-red-600 rounded-lg flex items-center justify-center shadow-lg shadow-red-900/50 group-hover:scale-110 group-hover:shadow-red-600/50 transition-all duration-300">
-                  <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
-                  </svg>
-                </div>
-                <span className="text-xl md:text-2xl font-black text-white tracking-tight">
-                  VAAM <span className="text-red-500">Motors</span>
-                </span>
-              </Link>
-
-              <div className="hidden md:flex items-center gap-1">
-                {[
-                  { href: '/' as const, label: t('home') },
-                  { href: '/about' as const, label: t('about') },
-                ].map((link) => (
-                  <Link
-                    key={link.href}
-                    href={link.href}
-                    className="animated-underline text-gray-300 hover:text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 hover:bg-white/5"
-                  >
-                    {link.label}
-                  </Link>
-                ))}
-                <Link
-                  href="/contact"
-                  className="btn-glow ml-2 bg-red-600 text-white px-5 py-2.5 rounded-lg font-semibold shadow-lg shadow-red-900/40"
-                >
-                  {t('contact')}
-                </Link>
+          <div className="flex items-center justify-between h-16">
+            {/* Logo */}
+            <Link href="/" className="flex items-center gap-2.5 group">
+              <div
+                className="w-8 h-8 rounded-lg flex items-center justify-center text-white text-sm font-black"
+                style={{ background: 'var(--accent)' }}
+              >
+                V
               </div>
+              <span className="font-extrabold text-lg tracking-tight text-[var(--text)]" style={{ fontFamily: 'Syne, sans-serif' }}>
+                VAAM <span style={{ color: 'var(--accent)' }}>Motors</span>
+              </span>
+            </Link>
+
+            {/* Desktop links */}
+            <div className="hidden md:flex items-center gap-7">
+              <Link href="/" className="nav-link">{t('home')}</Link>
+              <Link href="/about" className="nav-link">{t('about')}</Link>
+              <Link href="/contact" className="nav-link">{t('contact')}</Link>
             </div>
 
+            {/* Right */}
             <div className="flex items-center gap-3">
               <LanguageSwitcher />
-              <button
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="md:hidden relative w-10 h-10 flex flex-col justify-center items-center gap-1.5"
-                aria-label="Toggle menu"
+              <Link
+                href="/contact"
+                className="hidden md:inline-flex btn btn-primary text-sm"
               >
-                <span className={`block h-0.5 w-6 bg-white rounded transition-all duration-300 ${mobileMenuOpen ? 'rotate-45 translate-y-2' : ''}`} />
-                <span className={`block h-0.5 bg-white rounded transition-all duration-300 ${mobileMenuOpen ? 'opacity-0 w-0' : 'w-5'}`} />
-                <span className={`block h-0.5 w-6 bg-white rounded transition-all duration-300 ${mobileMenuOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+                Get a Quote
+              </Link>
+              <button
+                className="md:hidden p-2 rounded-lg hover:bg-[var(--bg)] transition-colors"
+                onClick={() => setMobileOpen(!mobileOpen)}
+                aria-label="Menu"
+              >
+                <div className="w-5 flex flex-col gap-1.5">
+                  <span className={`block h-0.5 bg-[var(--text)] rounded transition-all duration-200 ${mobileOpen ? 'rotate-45 translate-y-2' : ''}`} />
+                  <span className={`block h-0.5 bg-[var(--text)] rounded transition-all duration-200 ${mobileOpen ? 'opacity-0' : ''}`} />
+                  <span className={`block h-0.5 bg-[var(--text)] rounded transition-all duration-200 ${mobileOpen ? '-rotate-45 -translate-y-2' : ''}`} />
+                </div>
               </button>
             </div>
           </div>
 
-          <div className={`md:hidden overflow-hidden transition-all duration-300 ${mobileMenuOpen ? 'max-h-64 pb-4' : 'max-h-0'}`}>
-            <div className="flex flex-col gap-2 border-t border-white/10 pt-4">
+          {/* Mobile menu */}
+          {mobileOpen && (
+            <div className="md:hidden border-t border-[var(--border)] py-4 flex flex-col gap-1">
               {[
                 { href: '/' as const, label: t('home') },
                 { href: '/about' as const, label: t('about') },
-              ].map((link) => (
+                { href: '/contact' as const, label: t('contact') },
+              ].map((l) => (
                 <Link
-                  key={link.href}
-                  href={link.href}
-                  className="text-gray-300 hover:text-white px-4 py-2 rounded-lg font-medium transition-colors hover:bg-white/5"
-                  onClick={() => setMobileMenuOpen(false)}
+                  key={l.href}
+                  href={l.href}
+                  onClick={() => setMobileOpen(false)}
+                  className="px-3 py-2.5 rounded-lg text-[var(--text)] font-medium hover:bg-[var(--bg)] transition-colors"
                 >
-                  {link.label}
+                  {l.label}
                 </Link>
               ))}
-              <Link
-                href="/contact"
-                className="bg-red-600 text-white px-4 py-3 rounded-lg font-semibold text-center hover:bg-red-700 transition-colors"
-                onClick={() => setMobileMenuOpen(false)}
-              >
-                {t('contact')}
-              </Link>
             </div>
-          </div>
+          )}
         </div>
       </nav>
     </>
