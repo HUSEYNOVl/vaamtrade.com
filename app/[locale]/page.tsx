@@ -4,6 +4,8 @@ import { Car } from '@/types/car';
 import ServerPageRenderer from '@/components/ServerPageRenderer';
 import HomePageClient from '@/components/HomePageClient';
 import AnimatedHero from '@/components/AnimatedHero';
+import StatsStrip from '@/components/StatsStrip';
+import HowItWorks from '@/components/HowItWorks';
 
 export default async function HomePage({
   params,
@@ -49,21 +51,7 @@ export default async function HomePage({
       <AnimatedHero />
 
       {/* Stats strip */}
-      <div className="bg-white border-b border-[var(--border)]">
-        <div className="max-w-5xl mx-auto px-4 py-5 grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
-          {[
-            { value: '500+', label: 'Cars Exported' },
-            { value: '50+', label: 'Countries Served' },
-            { value: '10 Yrs', label: 'Experience' },
-            { value: '99%', label: 'Satisfaction' },
-          ].map((s) => (
-            <div key={s.label}>
-              <p className="text-2xl font-black" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--accent)' }}>{s.value}</p>
-              <p className="text-xs text-[var(--text-muted)] font-medium mt-0.5">{s.label}</p>
-            </div>
-          ))}
-        </div>
-      </div>
+      <StatsStrip />
 
       {/* Featured */}
       {featuredCars.length > 0 && (
@@ -84,35 +72,7 @@ export default async function HomePage({
       )}
 
       {/* How it works */}
-      <section className="bg-white border-y border-[var(--border)]">
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
-          <div className="text-center mb-10">
-            <p className="text-xs font-bold uppercase tracking-widest mb-1" style={{ color: 'var(--accent)' }}>Process</p>
-            <h2 className="text-2xl font-extrabold text-[var(--text)]" style={{ fontFamily: 'Syne, sans-serif' }}>
-              How It Works
-            </h2>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
-            {[
-              { n: '01', title: 'Browse & Select', desc: 'Search our inventory and find your ideal vehicle' },
-              { n: '02', title: 'Inspection Report', desc: 'We send a certified inspection report before purchase' },
-              { n: '03', title: 'Secure Payment', desc: 'Pay safely through our verified payment channels' },
-              { n: '04', title: 'Global Delivery', desc: 'We handle all logistics to your door worldwide' },
-            ].map((step) => (
-              <div key={step.n} className="text-center">
-                <div
-                  className="w-12 h-12 rounded-full flex items-center justify-center mx-auto mb-4 text-sm font-black"
-                  style={{ background: 'var(--accent-light)', color: 'var(--accent)', fontFamily: 'Syne, sans-serif' }}
-                >
-                  {step.n}
-                </div>
-                <h3 className="font-bold text-[var(--text)] mb-1" style={{ fontFamily: 'Syne, sans-serif' }}>{step.title}</h3>
-                <p className="text-sm text-[var(--text-muted)] leading-relaxed">{step.desc}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
+      <HowItWorks />
 
       {/* Full inventory */}
       <section id="inventory" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-14">
