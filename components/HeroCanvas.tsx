@@ -107,6 +107,7 @@ export default function HeroCanvas() {
     for (let i = 0; i < 12; i++) spawnParticle();
 
     function resize() {
+      if (!canvas) return;
       W = canvas.offsetWidth;
       H = canvas.offsetHeight;
       canvas.width = W * window.devicePixelRatio;
