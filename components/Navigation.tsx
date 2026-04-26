@@ -158,7 +158,7 @@ export default function Navigation() {
           {/* ── Mobile menu ─────────────────────────────── */}
           <div
             className="md:hidden overflow-hidden transition-all duration-300"
-            style={{ maxHeight: mobileOpen ? '260px' : '0', opacity: mobileOpen ? 1 : 0 }}
+            style={{ maxHeight: mobileOpen ? '320px' : '0', opacity: mobileOpen ? 1 : 0 }}
           >
             <div className="border-t border-[var(--border)] py-3 flex flex-col gap-1">
               {navLinks.map((l) => (

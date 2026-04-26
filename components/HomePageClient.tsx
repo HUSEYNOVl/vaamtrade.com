@@ -315,7 +315,7 @@ export default function HomePageClient({ cars, car }: HomePageClientProps) {
             <button onClick={clearFilters} className="btn btn-primary text-sm px-5">Clear All Filters</button>
           </div>
         ) : layout === 'grid' ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3 sm:gap-5">
             {filtered.map((c) => <CarCard key={c.id} car={c} layout="grid" />)}
           </div>
         ) : (

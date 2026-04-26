@@ -117,7 +117,7 @@ export default function AboutPageClient() {
     <div style={{ background: 'var(--bg)' }}>
 
       {/* ── HERO ───────────────────────────────────────── */}
-      <section className="relative overflow-hidden" style={{ background: '#0f0f0e', minHeight: 400 }}>
+      <section className="relative overflow-hidden" style={{ background: '#0f0f0e', minHeight: 280 }}>
         {/* dot grid */}
         <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: 'radial-gradient(circle, #c8321a 1px, transparent 1px)', backgroundSize: '28px 28px' }} />
         {/* glow */}
@@ -127,7 +127,7 @@ export default function AboutPageClient() {
 
         <div
           ref={hero.ref}
-          className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-32 text-center"
+          className="relative max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-12 sm:pt-24 pb-16 sm:pb-32 text-center"
         >
           <div
             className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-widest mb-6"
@@ -144,7 +144,7 @@ export default function AboutPageClient() {
           </div>
 
           <h1
-            className="text-5xl md:text-7xl font-extrabold text-white leading-tight mb-5"
+            className="text-3xl sm:text-5xl md:text-7xl font-extrabold text-white leading-tight mb-5"
             style={{
               fontFamily: 'Syne, sans-serif',
               opacity: hero.visible ? 1 : 0,
@@ -157,7 +157,7 @@ export default function AboutPageClient() {
           </h1>
 
           <p
-            className="text-gray-400 text-xl max-w-2xl mx-auto leading-relaxed"
+            className="text-gray-400 text-base sm:text-xl max-w-2xl mx-auto leading-relaxed"
             style={{
               opacity: hero.visible ? 1 : 0,
               transform: hero.visible ? 'none' : 'translateY(24px)',
@@ -169,7 +169,7 @@ export default function AboutPageClient() {
 
           {/* Stats row */}
           <div
-            className="mt-14 grid grid-cols-2 md:grid-cols-4 gap-6"
+            className="mt-10 grid grid-cols-2 md:grid-cols-4 gap-3 sm:gap-6"
             style={{
               opacity: hero.visible ? 1 : 0,
               transform: hero.visible ? 'none' : 'translateY(24px)',
@@ -189,9 +189,9 @@ export default function AboutPageClient() {
       </section>
 
       {/* ── MISSION ────────────────────────────────────── */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-12 sm:py-20 px-4 sm:px-6 lg:px-8">
         <div ref={mission.ref} className="max-w-5xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-8 sm:gap-12 items-center">
             {/* Left text */}
             <div style={{ opacity: mission.visible ? 1 : 0, transform: mission.visible ? 'none' : 'translateX(-32px)', transition: 'all 0.7s ease' }}>
               <span className="text-xs font-bold uppercase tracking-[0.25em] mb-3 block" style={{ color: 'var(--accent)' }}>Our Mission</span>
@@ -256,7 +256,7 @@ export default function AboutPageClient() {
       </section>
 
       {/* ── FEATURES ───────────────────────────────────── */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8" style={{ background: '#0f0f0e' }}>
+      <section className="py-12 sm:py-20 px-4 sm:px-6 lg:px-8" style={{ background: '#0f0f0e' }}>
         <div ref={features.ref} className="max-w-5xl mx-auto">
           <div
             className="text-center mb-14"
@@ -309,7 +309,7 @@ export default function AboutPageClient() {
       </section>
 
       {/* ── TIMELINE ───────────────────────────────────── */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-12 sm:py-20 px-4 sm:px-6 lg:px-8">
         <div ref={timeline.ref} className="max-w-3xl mx-auto">
           <div
             className="text-center mb-14"
@@ -324,7 +324,7 @@ export default function AboutPageClient() {
           <div className="relative">
             {/* Vertical line */}
             <div
-              className="absolute left-[calc(50%-1px)] top-0 bottom-0 w-px"
+              className="absolute left-0 sm:left-[calc(50%-1px)] top-0 bottom-0 w-px"
               style={{
                 background: 'linear-gradient(to bottom, transparent, var(--accent), var(--accent), transparent)',
                 opacity: timeline.visible ? 0.3 : 0,
@@ -337,16 +337,16 @@ export default function AboutPageClient() {
               return (
                 <div
                   key={item.year}
-                  className={`relative flex items-center mb-10 ${isLeft ? 'justify-start' : 'justify-end'}`}
+                  className={`relative flex items-center mb-8 sm:mb-10 sm:${isLeft ? 'justify-start' : 'justify-end'} justify-start pl-8 sm:pl-0`}
                   style={{
                     opacity: timeline.visible ? 1 : 0,
-                    transform: timeline.visible ? 'none' : `translateX(${isLeft ? '-24px' : '24px'})`,
+                    transform: timeline.visible ? 'none' : 'translateY(24px)',
                     transition: `opacity 0.6s ${i * 0.15}s ease, transform 0.6s ${i * 0.15}s ease`,
                   }}
                 >
                   {/* Card */}
                   <div
-                    className="w-5/12 rounded-2xl p-5 border bg-white shadow-sm"
+                    className="w-full sm:w-5/12 rounded-2xl p-4 sm:p-5 border bg-white shadow-sm"
                     style={{ borderColor: 'var(--border)' }}
                   >
                     <span className="text-xs font-black tracking-wider mb-2 block" style={{ color: 'var(--accent)', fontFamily: 'Syne, sans-serif' }}>
@@ -356,9 +356,9 @@ export default function AboutPageClient() {
                     <p className="text-xs text-[var(--text-muted)] leading-relaxed">{item.desc}</p>
                   </div>
 
-                  {/* Center dot */}
+                  {/* Dot — left edge on mobile, center on sm+ */}
                   <div
-                    className="absolute left-1/2 -translate-x-1/2 w-4 h-4 rounded-full border-2 border-white"
+                    className="absolute left-0 sm:left-1/2 -translate-x-1/2 w-4 h-4 rounded-full border-2 border-white"
                     style={{ background: 'var(--accent)', boxShadow: '0 0 0 4px rgba(200,50,26,0.2)' }}
                   />
                 </div>
@@ -369,7 +369,7 @@ export default function AboutPageClient() {
       </section>
 
       {/* ── TEAM / CTA ─────────────────────────────────── */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 border-t border-[var(--border)]">
+      <section className="py-12 sm:py-20 px-4 sm:px-6 lg:px-8 border-t border-[var(--border)]">
         <div
           ref={team.ref}
           className="max-w-3xl mx-auto text-center"

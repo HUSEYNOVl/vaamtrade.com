@@ -19,7 +19,7 @@ export default function AnimatedHero() {
   const setQuick = (brand: string) => setSearch(brand);
 
   return (
-    <section className="relative overflow-hidden" style={{ minHeight: '520px' }}>
+    <section className="relative overflow-hidden" style={{ minHeight: 'clamp(360px, 60vh, 620px)' }}>
       {/* Animated canvas background */}
       <HeroCanvas />
 
@@ -39,7 +39,7 @@ export default function AnimatedHero() {
       />
 
       {/* Content */}
-      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-24 text-center">
+      <div className="relative z-10 max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12 sm:py-20 md:py-24 text-center">
         {/* Eyebrow badge */}
         <div
           className="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-semibold mb-7 tracking-widest uppercase"
@@ -60,7 +60,7 @@ export default function AnimatedHero() {
 
         {/* Headline */}
         <h1
-          className="text-white text-5xl md:text-7xl font-extrabold leading-[1.05] mb-5"
+          className="text-white text-3xl sm:text-5xl md:text-7xl font-extrabold leading-[1.05] mb-5"
           style={{
             fontFamily: 'Syne, sans-serif',
             animation: 'fadeUp 0.6s 0.1s ease both',
@@ -74,7 +74,7 @@ export default function AnimatedHero() {
 
         {/* Sub */}
         <p
-          className="text-gray-300 text-lg md:text-xl mb-10 max-w-xl mx-auto leading-relaxed"
+          className="text-gray-300 text-sm sm:text-lg md:text-xl mb-8 sm:mb-10 max-w-xl mx-auto leading-relaxed"
           style={{ animation: 'fadeUp 0.6s 0.2s ease both', textShadow: '0 2px 12px rgba(0,0,0,0.5)' }}
         >
           500+ premium vehicles. 50+ countries served.
