@@ -1,7 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/lib/prisma';
-import { unlink } from 'fs/promises';
-import path from 'path';
+import { v2 as cloudinary } from 'cloudinary';
+
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 export async function GET(
   request: NextRequest,
@@ -63,12 +68,11 @@ export async function DELETE(
       return NextResponse.json({ error: 'Media not found' }, { status: 404 });
     }
 
-    // Delete file from filesystem
+    // Delete file from Cloudinary
     try {
-      await unlink(media.path);
+      await cloudinary.uploader.destroy(media.path, { resource_type: 'auto' });
     } catch (error) {
-      console.error('Error deleting file:', error);
-      // Continue even if file deletion fails
+      console.error('Error deleting from Cloudinary:', error);
     }
 
     // Delete from database
