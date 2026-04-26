@@ -78,25 +78,12 @@ export default function Navigation() {
           <div className="flex items-center justify-between" style={{ height: '68px' }}>
 
             {/* ── Logo ─────────────────────────────────── */}
-            <Link href="/" className="flex items-center gap-3 group shrink-0">
-              <div
-                className="relative w-9 h-9 rounded-xl flex items-center justify-center text-white font-black text-base transition-transform duration-200 group-hover:scale-105"
-                style={{
-                  background: 'linear-gradient(135deg, #c8321a 0%, #a02518 100%)',
-                  boxShadow: '0 2px 12px rgba(200,50,26,0.35)',
-                }}
-              >
-                V
-                <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white" style={{ background: '#22c55e' }} />
-              </div>
-              <div className="leading-none">
-                <span className="font-black text-[17px] tracking-tight" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--text)' }}>
-                  VAAM
-                </span>
-                <span className="font-black text-[17px] tracking-tight ml-1.5" style={{ fontFamily: 'Syne, sans-serif', color: 'var(--accent)' }}>
-                  Motors
-                </span>
-              </div>
+            <Link href="/" className="flex items-center group shrink-0">
+              <img
+                src="https://res.cloudinary.com/dvoojvo7i/image/upload/v1777192196/uploads/sijqy34v6h0qlw9a5jbo.png"
+                alt="VAAM Motors"
+                className="h-10 w-auto transition-transform duration-200 group-hover:scale-105"
+              />
             </Link>
 
             {/* ── Desktop links ─────────────────────────── */}
