@@ -1,17 +1,14 @@
 'use client';
 
 import { contactInfo } from '@/config/contact';
-import { useState } from 'react';
 
 export default function FloatingContactIcons() {
-  const [isExpanded, setIsExpanded] = useState(false);
-
   const whatsappUrl = contactInfo.whatsappNumber
     ? `https://wa.me/${contactInfo.whatsappNumber.replace(/[^0-9]/g, '')}`
     : '#';
 
-  const phoneUrl = contactInfo.whatsappNumber
-    ? `tel:${contactInfo.whatsappNumber}`
+  const phoneUrl = contactInfo.phoneNumber
+    ? `tel:${contactInfo.phoneNumber}`
     : '#';
 
   const emailUrl = contactInfo.email
@@ -36,7 +33,7 @@ export default function FloatingContactIcons() {
       )}
 
       {/* Phone */}
-      {contactInfo.whatsappNumber && (
+      {contactInfo.phoneNumber && (
         <a
           href={phoneUrl}
           className="bg-blue-500 hover:bg-blue-600 text-white rounded-full p-3 md:p-4 shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-110"
@@ -63,4 +60,3 @@ export default function FloatingContactIcons() {
     </div>
   );
 }
-

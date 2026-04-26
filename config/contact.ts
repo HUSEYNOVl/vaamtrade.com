@@ -2,10 +2,10 @@
 // Edit these values to update your contact information
 
 export const contactInfo = {
-  instagramUrl: 'https://instagram.com/yourcompany',
-  wechatId: 'your-wechat-id',
-  whatsappNumber: '1234567890', // Include country code, e.g., '1234567890' for US
+  instagramUrl: 'https://www.instagram.com/sarkhan_huseynnov?igsh=MTgyNWlvM2tuMWhtYQ%3D%3D&utm_source=qr',
+  wechatId: '',
+  phoneNumber: '+8615711057424',
+  whatsappNumber: '994506651805', // Include country code, no + sign
   businessHours: 'Monday - Friday: 9:00 AM - 6:00 PM',
-  email: 'contact@vaamcarsale.com', // Optional: for contact form
+  email: 'sarhanhuseynov77@gmail.com',
 };
-
